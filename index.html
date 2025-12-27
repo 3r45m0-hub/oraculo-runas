@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Oráculo de Eros</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+        body { font-family: 'ui-sans-serif', system-ui; }
+        .font-serif { font-family: 'Cinzel', serif; }
+        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-spin-slow { animation: spin-slow 40s linear infinite; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Aquí pegué tu base de datos de runas
+        const RUNES_DATABASE = [
+            { name: 'Fehu', symbol: 'ᚠ', meaning: 'Riqueza y Energía Móvil', thoughts: ["La verdadera riqueza no es lo que acumulas, sino lo que eres capaz de poner en movimiento.", "El 'susurro de los dioses' te recuerda que la abundancia es una frecuencia, no solo un número.", "Como energía móvil, Fehu te pide que compartas tu brillo para que este se multiplique."], recommendations: ["Hoy es un día para invertir en ti mismo o en un proyecto que beneficie a otros.", "Revisa tu relación con lo material: ¿Eres dueño de tus cosas o tus cosas son dueñas de ti?", "Busca una forma de ser generoso de manera inesperada; activa el flujo de la abundancia."] },
+            { name: 'Uruz', symbol: 'ᚢ', meaning: 'Fuerza Vital y Salud', thoughts: ["La fuerza del uro es bruta; el Guerrero Espiritual es quien le da dirección y propósito.", "Tu cuerpo es el templo donde reside tu poder; escúchalo antes de que grite.", "El cambio de forma es necesario para sobrevivir. No temas a tu propia potencia interna."], recommendations: ["Realiza una actividad que te haga sentir vital: corre, baila o respira profundamente al aire libre.", "Es momento de enfrentar ese reto que te intimidaba; tienes la fuerza necesaria.", "Purifica tu entorno. Una mente clara requiere un espacio que respire salud."] },
+            // ... (He incluido todas tus runas en el código final)
+            { name: 'Thurisaz', symbol: 'ᚦ', meaning: 'Protección y Conflicto', thoughts: ["La espina protege la rosa, pero también puede herir. Elige bien tus batallas.", "A veces el mayor enemigo no está afuera, sino en la resistencia que ponemos al cambio.", "El conflicto es a menudo el preludio de una gran revelación. Observa el umbral."], recommendations: ["No actúes por impulso hoy. Detente antes de cruzar la puerta del conflicto.", "Medita sobre aquello que te hace sentir a la defensiva. ¿Qué estás protegiendo realmente?", "Usa tu fuerza para establecer límites saludables con personas que drenan tu energía."] },
+            { name: 'Ansuz', symbol: 'ᚨ', meaning: 'Comunicación y Sabiduría', thoughts: ["La palabra es el vehículo del espíritu. Habla con la verdad y escucharás la sabiduría.", "Presta atención a las 'coincidencias'; son mensajes del inconsciente buscando tu atención.", "El conocimiento se vuelve sabiduría solo cuando se aplica con compasión."], recommendations: ["Escucha más de lo que hablas hoy. El universo tiene un mensaje para ti en la voz de otro.", "Escribe tus pensamientos en un diario. Deja que el 'susurro' fluya a través de tu mano.", "Busca el consejo de un mentor o de alguien que respetes profundamente."] },
+            { name: 'Raido', symbol: 'ᚱ', meaning: 'El Viaje y el Ritmo', thoughts: ["El camino es el destino. Si el ritmo es el correcto, llegarás donde debes estar.", "La vida es una danza de ciclos. Aprende a fluir con la música del cosmos.", "Viajar hacia afuera es a menudo el pretexto para el viaje más importante: el interior."], recommendations: ["Toma una ruta diferente para ir al trabajo. Rompe la inercia de la rutina.", "Es un buen día para planificar tu próximo paso importante. Pon orden en tu trayectoria.", "Confía en el proceso. Aunque parezca que vas lento, estás en movimiento."] },
+            { name: 'Kenaz', symbol: 'ᚲ', meaning: 'Conocimiento y Luz', thoughts: ["La antorcha ilumina el camino, pero también consume lo viejo para crear calor.", "La creatividad es la expresión pura del alma. Deja que tu fuego interno brille.", "La claridad mental llega cuando dejamos de buscar afuera y encendemos la luz interna."], recommendations: ["Inicia ese proyecto artístico o creativo que has estado postergando.", "Estudia algo que te apasione. El conocimiento es el combustible de tu espíritu.", "Sé la luz para alguien que esté pasando por un momento oscuro hoy."] },
+            { name: 'Gebo', symbol: 'ᚷ', meaning: 'El Regalo y la Unión', thoughts: ["Todo intercambio sagrado requiere equilibrio. Dar es tan importante como saber recibir.", "Las uniones verdaderas son contratos de alma que nos ayudan a crecer.", "El mayor regalo que puedes ofrecer es tu presencia plena y honesta."], recommendations: ["Ten un detalle con un socio o pareja. Fortalece los vínculos que te sostienen.", "Acepta con gratitud lo que el día te ofrezca, incluso si no es lo que esperabas.", "Busca la armonía en tus relaciones. Perdona una deuda pendiente, sea emocional o material."] },
+            { name: 'Wunjo', symbol: 'ᚹ', meaning: 'Alegría y Éxito', thoughts: ["La felicidad no es una meta, sino el subproducto de vivir en armonía con tu verdad.", "La gloria llega cuando el esfuerzo y la pasión se encuentran en el punto justo.", "Disfruta del presente; el ayer es un sueño y el mañana una promesa."], recommendations: ["Celebra algo hoy, por pequeño que sea. La gratitud atrae más motivos para celebrar.", "Rodéate de personas que eleven tu vibración y compartan tu alegría.", "Permítete un momento de ocio puro. El descanso también es parte del éxito."] },
+            { name: 'Hagalaz', symbol: 'ᚼ', meaning: 'Crisis y Transformación', thoughts: ["El granizo destruye la cosecha, pero riega la tierra para el futuro. Acepta el cambio.", "Las estructuras que se rompen son aquellas que ya no podían sostener tu crecimiento.", "En el centro de la tormenta reside la calma del observador. Sé ese observador."], recommendations: ["No luches contra lo inevitable. Suelta el control y observa qué queda en pie.", "Identifica un hábito destructivo y deja que la crisis actual te ayude a eliminarlo.", "Confía en que lo que se va deja espacio para algo mucho más auténtico."] },
+            { name: 'Nauthiz', symbol: 'ᚾ', meaning: 'Necesidad y Resistencia', thoughts: ["La carencia es la chispa de la invención. ¿Qué puedes crear con lo que tienes?", "El dolor es un maestro que nos señala dónde debemos prestar atención.", "La verdadera libertad surge cuando dejamos de ser esclavos de nuestros deseos inmediatos."], recommendations: ["Practica la austeridad hoy. Descubre qué es lo que realmente necesitas para estar bien.", "Sé paciente con tus limitaciones. El hierro se forja bajo presión y fuego.", "Ayuda a alguien que tenga menos que tú; verás tus propias necesidades con otra perspectiva."] },
+            { name: 'Isa', symbol: 'ᛁ', meaning: 'Hielo y Pausa', thoughts: ["El hielo preserva y detiene. A veces, la acción más poderosa es no hacer nada.", "En la quietud del frío, el ego se cristaliza y puede ser observado con claridad.", "No fuerces el deshielo. Cada estación tiene su propósito y su tiempo."], recommendations: ["Es un día para la introspección silenciosa. Medita o camina en soledad.", "Pospón decisiones importantes. El panorama aún no está claro; espera a que el hielo ceda.", "Enfócate en fortalecer tu centro interno antes de intentar expandirte al exterior."] },
+            { name: 'Jera', symbol: 'ᛃ', meaning: 'Cosecha y Ciclos Naturales', thoughts: ["Has sembrado con esfuerzo; ahora es tiempo de recibir con humildad.", "La naturaleza no tiene prisa, y sin embargo, todo llega a completarse.", "Honra tus procesos. Cada paso del ciclo es vital para el resultado final."], recommendations: ["Recoge los frutos de un trabajo anterior. Disfruta de la recompensa sin culpa.", "Planifica a largo plazo. Lo que siembres hoy determinará tu cosecha del próximo año.", "Agradece a quienes te ayudaron en el proceso de cultivo de tus sueños."] },
+            { name: 'Eihwaz', symbol: 'ᛇ', meaning: 'Resiliencia y Conexión', thoughts: ["Como el tejo, eres un puente entre la tierra y el cielo, entre la vida y la muerte.", "La verdadera fuerza es flexible. Aquello que no se dobla, se rompe ante el viento.", "Tus raíces son más profundas de lo que crees. Confía en tu herencia espiritual."], recommendations: ["Mantente firme en tus valores a pesar de las presiones externas.", "Conecta con tus ancestros. Busca fuerza en las historias de quienes vinieron antes.", "Sé un pilar de apoyo para otros. Tu estabilidad es contagiosa."] },
+            { name: 'Perthro', symbol: 'ᛈ', meaning: 'Misterio y Destino', thoughts: ["El azar es solo el nombre que le damos a las leyes que aún no comprendemos.", "Dentro de lo oculto reside la semilla de toda posibilidad. Abraza el misterio.", "El destino no está escrito en piedra, sino en las elecciones que haces en el presente."], recommendations: ["Abre tu mente a lo inesperado. No intentes predecir cada resultado hoy.", "Presta atención a tus sueños y corazonadas; el inconsciente te está hablando.", "Juega. Recupera la capacidad de asombro ante las sorpresas de la vida."] },
+            { name: 'Algiz', symbol: 'ᛉ', meaning: 'Protección y Conciencia Superior', thoughts: ["Tu mayor protección es mantener una vibración elevada y pensamientos puros.", "Como el alce, mantente alerta pero tranquilo. La intuición es tu radar espiritual.", "Estás conectado con lo divino; nada puede dañarte si permaneces en tu centro."], recommendations: ["Confía en tu 'instinto'. Si algo se siente mal, probablemente lo esté.", "Visualiza un escudo de luz a tu alrededor antes de entrar en ambientes estresantes.", "Actúa como un protector para los más débiles hoy."] },
+            { name: 'Sowilo', symbol: 'ᛊ', meaning: 'El Sol y la Integridad', thoughts: ["El éxito es inevitable cuando actúas desde la totalidad de tu ser.", "Tu luz interior no necesita permiso para brillar. Simplemente, sé tú mismo.", "La victoria es amarga si no se logra con honor e integridad."], recommendations: ["Atrévete a ser el centro de atención hoy. Comparte tus ideas con confianza.", "Busca la claridad en una situación confusa. La verdad saldrá a la luz pronto.", "Recarga tus energías. Pasa tiempo bajo el sol o haz algo que te llene de entusiasmo."] },
+            { name: 'Tiwaz', symbol: 'ᛏ', meaning: 'Justicia y Sacrificio', thoughts: ["El Guerrero Espiritual sabe que a veces hay que perder una mano para ganar la paz.", "La justicia no es venganza, sino el restablecimiento del equilibrio sagrado.", "Tu voluntad es tu flecha; asegúrate de apuntar a un blanco que valga la pena."], recommendations: ["Haz lo correcto, incluso si es el camino más difícil.", "Identifica qué estás dispuesto a sacrificar para alcanzar tu meta más alta.", "Sé disciplinado en tu práctica espiritual o en tu trabajo hoy."] },
+            { name: 'Berkano', symbol: 'ᛒ', meaning: 'Nacimiento y Crecimiento', thoughts: ["Toda nueva idea necesita un tiempo de gestación en la oscuridad del útero.", "El crecimiento real es silencioso y constante, como el de un árbol en el bosque.", "La energía femenina de nutrición es la que permite que la vida florezca."], recommendations: ["Cuida de algo vivo: una planta, una mascota o un proyecto naciente.", "Sé amable contigo mismo. El autoperdón es la mejor medicina para crecer.", "Es un excelente día para temas relacionados con la familia y el hogar."] },
+            { name: 'Ehwaz', symbol: 'ᛖ', meaning: 'Movimiento y Asociación', thoughts: ["El jinete y el caballo deben ser uno solo para cruzar el desierto con éxito.", "La confianza es el puente que nos permite avanzar hacia lo desconocido.", "El progreso real ocurre cuando coordinamos nuestras acciones con los demás."], recommendations: ["Fortalece una alianza. Habla con claridad sobre tus expectativas con tus socios.", "Muévete físicamente. Cambia tu entorno para cambiar tu perspectiva.", "Sé un compañero leal. El apoyo mutuo multiplicará tus resultados hoy."] },
+            { name: 'Mannaz', symbol: 'ᛗ', meaning: 'La Humanidad y el Ser', thoughts: ["Tú eres un microcosmos del universo. Conocerse a uno mismo es conocer el todo.", "La mente es un sirviente maravilloso pero un amo terrible. Entrénala.", "Tu humanidad es tu mayor fortaleza. No temas mostrar tu vulnerabilidad."], recommendations: ["Dedica tiempo a la meditación profunda o al estudio de la psicología.", "Busca puntos en común con las personas que te rodean en lugar de diferencias.", "Evalúa tus roles sociales. ¿Cuáles son auténticos y cuáles son máscaras?"] },
+            { name: 'Laguz', symbol: 'ᛚ', meaning: 'Agua e Intuición', thoughts: ["El agua fluye alrededor de los obstáculos. No luches, busca el camino de menor resistencia.", "Tus emociones son mareas que limpian la orilla de tu alma. Déjalas fluir.", "Confía en lo invisible. La profundidad del océano contiene tesoros que la superficie no imagina."], recommendations: ["Toma un baño consciente o pasa tiempo cerca del agua para limpiar tu energía.", "No busques respuestas lógicas hoy; deja que tu corazón te guíe.", "Escucha tus sueños. Anota lo primero que recuerdes al despertar."] },
+            { name: 'Ingwaz', symbol: 'ᛜ', meaning: 'Potencial y Almacenaje', thoughts: ["Hay una fuerza latente en ti que está esperando el momento justo para estallar.", "La introspección es el almacén de tu futura victoria. No desperdicies tu energía.", "La conclusión de un ciclo es la preparación necesaria para el siguiente gran salto."], recommendations: ["Termina lo que empezaste. No dejes cabos sueltos que drenen tu atención.", "Mantén tus planes en secreto por ahora. Deja que ganen fuerza en el silencio.", "Busca un espacio de soledad para integrar los aprendizajes de los últimos meses."] },
+            { name: 'Dagaz', symbol: 'ᛞ', meaning: 'Despertar y Transformación', thoughts: ["La noche y el día se encuentran en el alba. Los opuestos son solo caras de la misma moneda.", "La iluminación no es algo que se alcanza, es algo que se reconoce en el presente.", "Un cambio radical de perspectiva puede transformar tu mundo en un instante."], recommendations: ["Rompe con un viejo paradigma hoy. Haz algo de una manera totalmente opuesta a lo habitual.", "Observa la belleza en lo cotidiano. El despertar está en los detalles simples.", "Confía en que la oscuridad está pasando. El amanecer está garantizado."] },
+            { name: 'Othila', symbol: 'ᛟ', meaning: 'Herencia y Pertenencia', thoughts: ["Honrar a tus padres no significa repetir sus errores, sino extraer la sabiduría de su historia.", "Tu hogar está donde tu corazón se siente en paz y alineado con su propósito.", "El legado más valioso que dejarás no son las cosas, sino el impacto en las almas de otros."], recommendations: ["Conecta con tus raíces familiares. Llama a un pariente o mira fotos antiguas.", "Haz algo para embellecer o bendecir tu espacio físico. Tu casa es tu refugio.", "Define qué valores quieres que sean tu herencia para el mundo."] }
+        ];
+
+        const App = () => {
+            const [selectedRune, setSelectedRune] = useState(null);
+            const [isSpinning, setIsSpinning] = useState(false);
+            const [showIntro, setShowIntro] = useState(true);
+            const [showReadme, setShowReadme] = useState(false);
+            const [history, setHistory] = useState([]);
+
+            const pickRune = () => {
+                setIsSpinning(true);
+                setSelectedRune(null);
+                setTimeout(() => {
+                    const randomRune = RUNES_DATABASE[Math.floor(Math.random() * RUNES_DATABASE.length)];
+                    const randomThought = randomRune.thoughts[Math.floor(Math.random() * randomRune.thoughts.length)];
+                    const randomRec = randomRune.recommendations[Math.floor(Math.random() * randomRune.recommendations.length)];
+                    const result = { ...randomRune, currentThought: randomThought, currentRec: randomRec, timestamp: new Date().toLocaleTimeString() };
+                    setSelectedRune(result);
+                    setHistory(prev => [result, ...prev].slice(0, 5));
+                    setIsSpinning(false);
+                    setShowIntro(false);
+                }, 1200);
+            };
+
+            return (
+                <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-6 selection:bg-amber-500/30 overflow-x-hidden">
+                    {/* Botón Ayuda */}
+                    <div className="fixed top-6 right-6 flex gap-2 z-50">
+                        <button onClick={() => setShowReadme(true)} className="p-3 bg-slate-900/80 backdrop-blur border border-slate-700 rounded-full hover:bg-slate-800 text-amber-400 shadow-lg">
+                            <i data-lucide="help-circle"></i>
+                        </button>
+                    </div>
+
+                    {/* Modal Ayuda */}
+                    {showReadme && (
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                            <div className="bg-slate-900 border border-slate-700 w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl p-8 relative">
+                                <button onClick={() => setShowReadme(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white">
+                                    <i data-lucide="x"></i>
+                                </button>
+                                <h2 className="text-3xl font-serif font-bold text-amber-500 mb-6 border-b border-slate-800 pb-4">Manual del Guerrero</h2>
+                                <p className="text-slate-300 mb-4">Las runas actúan como códigos para extraer información de tu inconsciente. Lo que aparece hoy es un reflejo de tu estado vibratorio.</p>
+                                <button onClick={() => setShowReadme(false)} className="mt-4 bg-amber-600 hover:bg-amber-500 text-white px-8 py-2 rounded-lg font-bold w-full">CERRAR</button>
+                            </div>
+                        </div>
+                    )}
+
+                    <header className="w-full max-w-2xl text-center mb-10 pt-10">
+                        <h1 className="text-4xl md:text-5xl font-serif font-bold text-amber-100 mb-2">El Oráculo de Eros</h1>
+                        <p className="text-slate-400 italic">Diálogo profundo con tu Yo interior</p>
+                    </header>
+
+                    <main className="w-full max-w-lg flex flex-col items-center">
+                        <div className="relative w-full aspect-square max-w-[340px] mb-10 flex items-center justify-center">
+                            <div className={`absolute inset-0 border-2 border-dashed border-amber-900/20 rounded-full ${isSpinning ? 'animate-spin-slow' : ''}`}></div>
+                            <div className="relative z-10 w-64 h-64 bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-800 flex flex-col items-center justify-center p-8">
+                                {isSpinning ? (
+                                    <div className="flex flex-col items-center">
+                                        <div className="animate-spin text-amber-500 mb-2"><i data-lucide="refresh-cw" size="48"></i></div>
+                                        <p className="text-amber-500 text-[10px] uppercase tracking-widest">Descifrando...</p>
+                                    </div>
+                                ) : selectedRune ? (
+                                    <div className="text-center">
+                                        <span className="text-8xl text-amber-200 font-serif">{selectedRune.symbol}</span>
+                                        <h2 className="text-2xl font-bold text-amber-100 tracking-widest mt-2">{selectedRune.name.toUpperCase()}</h2>
+                                        <p className="text-amber-500/90 text-xs font-semibold uppercase">{selectedRune.meaning}</p>
+                                    </div>
+                                ) : (
+                                    <div className="text-center opacity-30"><i data-lucide="book-open" className="mx-auto mb-2"></i><p className="text-xs italic">Formulando la pregunta...</p></div>
+                                )}
+                            </div>
+                        </div>
+
+                        <button onClick={pickRune} disabled={isSpinning} className="px-10 py-4 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl font-black tracking-widest shadow-xl transition-all active:scale-95 disabled:opacity-50">
+                            {selectedRune ? "NUEVA CONSULTA" : "SACAR RUNA"}
+                        </button>
+
+                        {selectedRune && !isSpinning && (
+                            <div className="w-full mt-10 space-y-4">
+                                <div className="bg-slate-900/60 border-t border-slate-800 p-7 rounded-3xl backdrop-blur-md">
+                                    <p className="text-xl md:text-2xl leading-relaxed text-amber-50 font-serif italic text-center">"{selectedRune.currentThought}"</p>
+                                </div>
+                                <div className="bg-emerald-950/20 border-l-2 border-emerald-500/40 p-6 rounded-2xl">
+                                    <p className="text-slate-300 text-sm">{selectedRune.currentRec}</p>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    <footer className="mt-auto pt-16 pb-6 text-slate-700 text-[9px] text-center uppercase tracking-widest">
+                        Basado en el sistema rúnico de Eros Rodrich
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+        
+        // Inicializar iconos
+        setTimeout(() => lucide.createIcons(), 100);
+    </script>
+</body>
+</html>
