@@ -8,26 +8,24 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
-        body { font-family: 'ui-sans-serif', system-ui; }
+        body { background-color: #020617; color: #f8fafc; font-family: sans-serif; }
         .font-serif { font-family: 'Cinzel', serif; }
         @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin-slow 40s linear infinite; }
+        .rune-glow { text-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
-        
-        // Aquí pegué tu base de datos de runas
+        const { useState } = React;
+
         const RUNES_DATABASE = [
             { name: 'Fehu', symbol: 'ᚠ', meaning: 'Riqueza y Energía Móvil', thoughts: ["La verdadera riqueza no es lo que acumulas, sino lo que eres capaz de poner en movimiento.", "El 'susurro de los dioses' te recuerda que la abundancia es una frecuencia, no solo un número.", "Como energía móvil, Fehu te pide que compartas tu brillo para que este se multiplique."], recommendations: ["Hoy es un día para invertir en ti mismo o en un proyecto que beneficie a otros.", "Revisa tu relación con lo material: ¿Eres dueño de tus cosas o tus cosas son dueñas de ti?", "Busca una forma de ser generoso de manera inesperada; activa el flujo de la abundancia."] },
             { name: 'Uruz', symbol: 'ᚢ', meaning: 'Fuerza Vital y Salud', thoughts: ["La fuerza del uro es bruta; el Guerrero Espiritual es quien le da dirección y propósito.", "Tu cuerpo es el templo donde reside tu poder; escúchalo antes de que grite.", "El cambio de forma es necesario para sobrevivir. No temas a tu propia potencia interna."], recommendations: ["Realiza una actividad que te haga sentir vital: corre, baila o respira profundamente al aire libre.", "Es momento de enfrentar ese reto que te intimidaba; tienes la fuerza necesaria.", "Purifica tu entorno. Una mente clara requiere un espacio que respire salud."] },
-            // ... (He incluido todas tus runas en el código final)
             { name: 'Thurisaz', symbol: 'ᚦ', meaning: 'Protección y Conflicto', thoughts: ["La espina protege la rosa, pero también puede herir. Elige bien tus batallas.", "A veces el mayor enemigo no está afuera, sino en la resistencia que ponemos al cambio.", "El conflicto es a menudo el preludio de una gran revelación. Observa el umbral."], recommendations: ["No actúes por impulso hoy. Detente antes de cruzar la puerta del conflicto.", "Medita sobre aquello que te hace sentir a la defensiva. ¿Qué estás protegiendo realmente?", "Usa tu fuerza para establecer límites saludables con personas que drenan tu energía."] },
             { name: 'Ansuz', symbol: 'ᚨ', meaning: 'Comunicación y Sabiduría', thoughts: ["La palabra es el vehículo del espíritu. Habla con la verdad y escucharás la sabiduría.", "Presta atención a las 'coincidencias'; son mensajes del inconsciente buscando tu atención.", "El conocimiento se vuelve sabiduría solo cuando se aplica con compasión."], recommendations: ["Escucha más de lo que hablas hoy. El universo tiene un mensaje para ti en la voz de otro.", "Escribe tus pensamientos en un diario. Deja que el 'susurro' fluya a través de tu mano.", "Busca el consejo de un mentor o de alguien que respetes profundamente."] },
             { name: 'Raido', symbol: 'ᚱ', meaning: 'El Viaje y el Ritmo', thoughts: ["El camino es el destino. Si el ritmo es el correcto, llegarás donde debes estar.", "La vida es una danza de ciclos. Aprende a fluir con la música del cosmos.", "Viajar hacia afuera es a menudo el pretexto para el viaje más importante: el interior."], recommendations: ["Toma una ruta diferente para ir al trabajo. Rompe la inercia de la rutina.", "Es un buen día para planificar tu próximo paso importante. Pon orden en tu trayectoria.", "Confía en el proceso. Aunque parezca que vas lento, estás en movimiento."] },
@@ -55,92 +53,105 @@
         const App = () => {
             const [selectedRune, setSelectedRune] = useState(null);
             const [isSpinning, setIsSpinning] = useState(false);
-            const [showIntro, setShowIntro] = useState(true);
             const [showReadme, setShowReadme] = useState(false);
-            const [history, setHistory] = useState([]);
 
             const pickRune = () => {
                 setIsSpinning(true);
                 setSelectedRune(null);
+                
                 setTimeout(() => {
                     const randomRune = RUNES_DATABASE[Math.floor(Math.random() * RUNES_DATABASE.length)];
                     const randomThought = randomRune.thoughts[Math.floor(Math.random() * randomRune.thoughts.length)];
                     const randomRec = randomRune.recommendations[Math.floor(Math.random() * randomRune.recommendations.length)];
-                    const result = { ...randomRune, currentThought: randomThought, currentRec: randomRec, timestamp: new Date().toLocaleTimeString() };
-                    setSelectedRune(result);
-                    setHistory(prev => [result, ...prev].slice(0, 5));
+                    
+                    setSelectedRune({
+                        ...randomRune,
+                        currentThought: randomThought,
+                        currentRec: randomRec
+                    });
                     setIsSpinning(false);
-                    setShowIntro(false);
-                }, 1200);
+                }, 1000);
             };
 
             return (
-                <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-6 selection:bg-amber-500/30 overflow-x-hidden">
-                    {/* Botón Ayuda */}
-                    <div className="fixed top-6 right-6 flex gap-2 z-50">
-                        <button onClick={() => setShowReadme(true)} className="p-3 bg-slate-900/80 backdrop-blur border border-slate-700 rounded-full hover:bg-slate-800 text-amber-400 shadow-lg">
-                            <i data-lucide="help-circle"></i>
-                        </button>
-                    </div>
+                <div className="min-h-screen flex flex-col items-center p-6 bg-slate-950">
+                    {/* Botón Info */}
+                    <button 
+                        onClick={() => setShowReadme(true)}
+                        className="fixed top-6 right-6 w-10 h-10 bg-slate-900 border border-slate-700 rounded-full text-amber-500 flex items-center justify-center text-xl font-bold shadow-lg z-50"
+                    >
+                        ?
+                    </button>
 
-                    {/* Modal Ayuda */}
+                    {/* Modal */}
                     {showReadme && (
-                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-                            <div className="bg-slate-900 border border-slate-700 w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl p-8 relative">
-                                <button onClick={() => setShowReadme(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white">
-                                    <i data-lucide="x"></i>
-                                </button>
-                                <h2 className="text-3xl font-serif font-bold text-amber-500 mb-6 border-b border-slate-800 pb-4">Manual del Guerrero</h2>
-                                <p className="text-slate-300 mb-4">Las runas actúan como códigos para extraer información de tu inconsciente. Lo que aparece hoy es un reflejo de tu estado vibratorio.</p>
-                                <button onClick={() => setShowReadme(false)} className="mt-4 bg-amber-600 hover:bg-amber-500 text-white px-8 py-2 rounded-lg font-bold w-full">CERRAR</button>
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+                            <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl p-8">
+                                <h2 className="text-2xl font-serif text-amber-500 mb-4 border-b border-slate-800 pb-2">Guía del Oráculo</h2>
+                                <p className="text-slate-300 text-sm mb-6 leading-relaxed">
+                                    Las runas son espejos de tu inconsciente. No predicen, revelan lo que ya está en ti. Escucha el susurro.
+                                </p>
+                                <button onClick={() => setShowReadme(false)} className="w-full bg-amber-600 py-3 rounded-xl font-bold">ENTENDIDO</button>
                             </div>
                         </div>
                     )}
 
-                    <header className="w-full max-w-2xl text-center mb-10 pt-10">
-                        <h1 className="text-4xl md:text-5xl font-serif font-bold text-amber-100 mb-2">El Oráculo de Eros</h1>
-                        <p className="text-slate-400 italic">Diálogo profundo con tu Yo interior</p>
+                    <header className="text-center mb-10 pt-8">
+                        <h1 className="text-4xl font-serif font-bold text-amber-100 tracking-wider">El Oráculo de Eros</h1>
+                        <p className="text-slate-500 italic mt-2 text-sm">Diálogo con tu Yo interior</p>
                     </header>
 
-                    <main className="w-full max-w-lg flex flex-col items-center">
-                        <div className="relative w-full aspect-square max-w-[340px] mb-10 flex items-center justify-center">
-                            <div className={`absolute inset-0 border-2 border-dashed border-amber-900/20 rounded-full ${isSpinning ? 'animate-spin-slow' : ''}`}></div>
-                            <div className="relative z-10 w-64 h-64 bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-800 flex flex-col items-center justify-center p-8">
+                    <main className="w-full max-w-md flex flex-col items-center">
+                        <div className="relative w-72 h-72 mb-10 flex items-center justify-center">
+                            {/* Anillo de luz animado */}
+                            <div className={`absolute inset-0 border-2 border-dashed border-amber-900/30 rounded-full ${isSpinning ? 'animate-spin-slow' : ''}`}></div>
+                            
+                            <div className="relative z-10 w-56 h-56 bg-slate-900 rounded-[3rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-slate-800 flex flex-col items-center justify-center p-6">
                                 {isSpinning ? (
-                                    <div className="flex flex-col items-center">
-                                        <div className="animate-spin text-amber-500 mb-2"><i data-lucide="refresh-cw" size="48"></i></div>
-                                        <p className="text-amber-500 text-[10px] uppercase tracking-widest">Descifrando...</p>
+                                    <div className="text-amber-500 text-center">
+                                        <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                        <p className="text-[10px] uppercase tracking-widest font-bold">Descifrando...</p>
                                     </div>
                                 ) : selectedRune ? (
-                                    <div className="text-center">
-                                        <span className="text-8xl text-amber-200 font-serif">{selectedRune.symbol}</span>
-                                        <h2 className="text-2xl font-bold text-amber-100 tracking-widest mt-2">{selectedRune.name.toUpperCase()}</h2>
-                                        <p className="text-amber-500/90 text-xs font-semibold uppercase">{selectedRune.meaning}</p>
+                                    <div className="text-center animate-in fade-in zoom-in duration-500">
+                                        <span className="text-8xl text-amber-200 font-serif rune-glow">{selectedRune.symbol}</span>
+                                        <h2 className="text-xl font-bold text-amber-100 tracking-[0.2em] mt-2 uppercase">{selectedRune.name}</h2>
+                                        <p className="text-amber-600 text-[10px] font-bold uppercase tracking-tighter">{selectedRune.meaning}</p>
                                     </div>
                                 ) : (
-                                    <div className="text-center opacity-30"><i data-lucide="book-open" className="mx-auto mb-2"></i><p className="text-xs italic">Formulando la pregunta...</p></div>
+                                    <div className="text-slate-700 text-center px-4">
+                                        <span className="text-4xl mb-2 block">✨</span>
+                                        <p className="text-xs italic">Haz una pregunta y saca una runa del saco.</p>
+                                    </div>
                                 )}
                             </div>
                         </div>
 
-                        <button onClick={pickRune} disabled={isSpinning} className="px-10 py-4 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl font-black tracking-widest shadow-xl transition-all active:scale-95 disabled:opacity-50">
-                            {selectedRune ? "NUEVA CONSULTA" : "SACAR RUNA"}
+                        <button 
+                            onClick={pickRune} 
+                            disabled={isSpinning}
+                            className="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl font-black tracking-widest shadow-2xl transition-all active:scale-95 disabled:opacity-50"
+                        >
+                            {selectedRune ? "VOLVER A CONSULTAR" : "SACAR RUNA"}
                         </button>
 
                         {selectedRune && !isSpinning && (
-                            <div className="w-full mt-10 space-y-4">
-                                <div className="bg-slate-900/60 border-t border-slate-800 p-7 rounded-3xl backdrop-blur-md">
-                                    <p className="text-xl md:text-2xl leading-relaxed text-amber-50 font-serif italic text-center">"{selectedRune.currentThought}"</p>
+                            <div className="w-full mt-8 space-y-4 animate-in slide-in-from-bottom-4 duration-700">
+                                <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl">
+                                    <p className="text-lg md:text-xl text-amber-50 font-serif italic text-center">
+                                        "{selectedRune.currentThought}"
+                                    </p>
                                 </div>
-                                <div className="bg-emerald-950/20 border-l-2 border-emerald-500/40 p-6 rounded-2xl">
-                                    <p className="text-slate-300 text-sm">{selectedRune.currentRec}</p>
+                                <div className="bg-emerald-950/20 border-l-4 border-emerald-500/50 p-5 rounded-r-2xl">
+                                    <h4 className="text-[10px] font-bold text-emerald-500 mb-1 uppercase tracking-widest">Acción sugerida:</h4>
+                                    <p className="text-slate-300 text-sm leading-relaxed">{selectedRune.currentRec}</p>
                                 </div>
                             </div>
                         )}
                     </main>
 
-                    <footer className="mt-auto pt-16 pb-6 text-slate-700 text-[9px] text-center uppercase tracking-widest">
-                        Basado en el sistema rúnico de Eros Rodrich
+                    <footer className="mt-12 text-slate-800 text-[10px] text-center uppercase tracking-widest">
+                        Basado en el sistema rúnico de Eros Rodrich • v2.1
                     </footer>
                 </div>
             );
@@ -148,9 +159,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-        
-        // Inicializar iconos
-        setTimeout(() => lucide.createIcons(), 100);
     </script>
 </body>
 </html>
