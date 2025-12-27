@@ -3,18 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Oráculo de Eros</title>
+    <title>Tu runa del día - Sabiduría Expandida</title>
+    <!-- Cargando librerías necesarias desde CDN -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
-        body { background-color: #020617; color: #f8fafc; font-family: sans-serif; }
-        .font-serif { font-family: 'Cinzel', serif; }
-        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .animate-spin-slow { animation: spin-slow 40s linear infinite; }
-        .rune-glow { text-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+        
+        body { 
+            background-color: #020617; 
+            color: #f8fafc; 
+            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; 
+        }
+
+        .font-serif { 
+            font-family: 'Cinzel', serif; 
+        }
+
+        @keyframes spin-slow { 
+            from { transform: rotate(0deg); } 
+            to { transform: rotate(360deg); } 
+        }
+
+        .animate-spin-slow { 
+            animation: spin-slow 40s linear infinite; 
+        }
+
+        .rune-glow { 
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.5); 
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -24,30 +54,678 @@
         const { useState } = React;
 
         const RUNES_DATABASE = [
-            { name: 'Fehu', symbol: 'ᚠ', meaning: 'Riqueza y Energía Móvil', thoughts: ["La verdadera riqueza no es lo que acumulas, sino lo que eres capaz de poner en movimiento.", "El 'susurro de los dioses' te recuerda que la abundancia es una frecuencia, no solo un número.", "Como energía móvil, Fehu te pide que compartas tu brillo para que este se multiplique."], recommendations: ["Hoy es un día para invertir en ti mismo o en un proyecto que beneficie a otros.", "Revisa tu relación con lo material: ¿Eres dueño de tus cosas o tus cosas son dueñas de ti?", "Busca una forma de ser generoso de manera inesperada; activa el flujo de la abundancia."] },
-            { name: 'Uruz', symbol: 'ᚢ', meaning: 'Fuerza Vital y Salud', thoughts: ["La fuerza del uro es bruta; el Guerrero Espiritual es quien le da dirección y propósito.", "Tu cuerpo es el templo donde reside tu poder; escúchalo antes de que grite.", "El cambio de forma es necesario para sobrevivir. No temas a tu propia potencia interna."], recommendations: ["Realiza una actividad que te haga sentir vital: corre, baila o respira profundamente al aire libre.", "Es momento de enfrentar ese reto que te intimidaba; tienes la fuerza necesaria.", "Purifica tu entorno. Una mente clara requiere un espacio que respire salud."] },
-            { name: 'Thurisaz', symbol: 'ᚦ', meaning: 'Protección y Conflicto', thoughts: ["La espina protege la rosa, pero también puede herir. Elige bien tus batallas.", "A veces el mayor enemigo no está afuera, sino en la resistencia que ponemos al cambio.", "El conflicto es a menudo el preludio de una gran revelación. Observa el umbral."], recommendations: ["No actúes por impulso hoy. Detente antes de cruzar la puerta del conflicto.", "Medita sobre aquello que te hace sentir a la defensiva. ¿Qué estás protegiendo realmente?", "Usa tu fuerza para establecer límites saludables con personas que drenan tu energía."] },
-            { name: 'Ansuz', symbol: 'ᚨ', meaning: 'Comunicación y Sabiduría', thoughts: ["La palabra es el vehículo del espíritu. Habla con la verdad y escucharás la sabiduría.", "Presta atención a las 'coincidencias'; son mensajes del inconsciente buscando tu atención.", "El conocimiento se vuelve sabiduría solo cuando se aplica con compasión."], recommendations: ["Escucha más de lo que hablas hoy. El universo tiene un mensaje para ti en la voz de otro.", "Escribe tus pensamientos en un diario. Deja que el 'susurro' fluya a través de tu mano.", "Busca el consejo de un mentor o de alguien que respetes profundamente."] },
-            { name: 'Raido', symbol: 'ᚱ', meaning: 'El Viaje y el Ritmo', thoughts: ["El camino es el destino. Si el ritmo es el correcto, llegarás donde debes estar.", "La vida es una danza de ciclos. Aprende a fluir con la música del cosmos.", "Viajar hacia afuera es a menudo el pretexto para el viaje más importante: el interior."], recommendations: ["Toma una ruta diferente para ir al trabajo. Rompe la inercia de la rutina.", "Es un buen día para planificar tu próximo paso importante. Pon orden en tu trayectoria.", "Confía en el proceso. Aunque parezca que vas lento, estás en movimiento."] },
-            { name: 'Kenaz', symbol: 'ᚲ', meaning: 'Conocimiento y Luz', thoughts: ["La antorcha ilumina el camino, pero también consume lo viejo para crear calor.", "La creatividad es la expresión pura del alma. Deja que tu fuego interno brille.", "La claridad mental llega cuando dejamos de buscar afuera y encendemos la luz interna."], recommendations: ["Inicia ese proyecto artístico o creativo que has estado postergando.", "Estudia algo que te apasione. El conocimiento es el combustible de tu espíritu.", "Sé la luz para alguien que esté pasando por un momento oscuro hoy."] },
-            { name: 'Gebo', symbol: 'ᚷ', meaning: 'El Regalo y la Unión', thoughts: ["Todo intercambio sagrado requiere equilibrio. Dar es tan importante como saber recibir.", "Las uniones verdaderas son contratos de alma que nos ayudan a crecer.", "El mayor regalo que puedes ofrecer es tu presencia plena y honesta."], recommendations: ["Ten un detalle con un socio o pareja. Fortalece los vínculos que te sostienen.", "Acepta con gratitud lo que el día te ofrezca, incluso si no es lo que esperabas.", "Busca la armonía en tus relaciones. Perdona una deuda pendiente, sea emocional o material."] },
-            { name: 'Wunjo', symbol: 'ᚹ', meaning: 'Alegría y Éxito', thoughts: ["La felicidad no es una meta, sino el subproducto de vivir en armonía con tu verdad.", "La gloria llega cuando el esfuerzo y la pasión se encuentran en el punto justo.", "Disfruta del presente; el ayer es un sueño y el mañana una promesa."], recommendations: ["Celebra algo hoy, por pequeño que sea. La gratitud atrae más motivos para celebrar.", "Rodéate de personas que eleven tu vibración y compartan tu alegría.", "Permítete un momento de ocio puro. El descanso también es parte del éxito."] },
-            { name: 'Hagalaz', symbol: 'ᚼ', meaning: 'Crisis y Transformación', thoughts: ["El granizo destruye la cosecha, pero riega la tierra para el futuro. Acepta el cambio.", "Las estructuras que se rompen son aquellas que ya no podían sostener tu crecimiento.", "En el centro de la tormenta reside la calma del observador. Sé ese observador."], recommendations: ["No luches contra lo inevitable. Suelta el control y observa qué queda en pie.", "Identifica un hábito destructivo y deja que la crisis actual te ayude a eliminarlo.", "Confía en que lo que se va deja espacio para algo mucho más auténtico."] },
-            { name: 'Nauthiz', symbol: 'ᚾ', meaning: 'Necesidad y Resistencia', thoughts: ["La carencia es la chispa de la invención. ¿Qué puedes crear con lo que tienes?", "El dolor es un maestro que nos señala dónde debemos prestar atención.", "La verdadera libertad surge cuando dejamos de ser esclavos de nuestros deseos inmediatos."], recommendations: ["Practica la austeridad hoy. Descubre qué es lo que realmente necesitas para estar bien.", "Sé paciente con tus limitaciones. El hierro se forja bajo presión y fuego.", "Ayuda a alguien que tenga menos que tú; verás tus propias necesidades con otra perspectiva."] },
-            { name: 'Isa', symbol: 'ᛁ', meaning: 'Hielo y Pausa', thoughts: ["El hielo preserva y detiene. A veces, la acción más poderosa es no hacer nada.", "En la quietud del frío, el ego se cristaliza y puede ser observado con claridad.", "No fuerces el deshielo. Cada estación tiene su propósito y su tiempo."], recommendations: ["Es un día para la introspección silenciosa. Medita o camina en soledad.", "Pospón decisiones importantes. El panorama aún no está claro; espera a que el hielo ceda.", "Enfócate en fortalecer tu centro interno antes de intentar expandirte al exterior."] },
-            { name: 'Jera', symbol: 'ᛃ', meaning: 'Cosecha y Ciclos Naturales', thoughts: ["Has sembrado con esfuerzo; ahora es tiempo de recibir con humildad.", "La naturaleza no tiene prisa, y sin embargo, todo llega a completarse.", "Honra tus procesos. Cada paso del ciclo es vital para el resultado final."], recommendations: ["Recoge los frutos de un trabajo anterior. Disfruta de la recompensa sin culpa.", "Planifica a largo plazo. Lo que siembres hoy determinará tu cosecha del próximo año.", "Agradece a quienes te ayudaron en el proceso de cultivo de tus sueños."] },
-            { name: 'Eihwaz', symbol: 'ᛇ', meaning: 'Resiliencia y Conexión', thoughts: ["Como el tejo, eres un puente entre la tierra y el cielo, entre la vida y la muerte.", "La verdadera fuerza es flexible. Aquello que no se dobla, se rompe ante el viento.", "Tus raíces son más profundas de lo que crees. Confía en tu herencia espiritual."], recommendations: ["Mantente firme en tus valores a pesar de las presiones externas.", "Conecta con tus ancestros. Busca fuerza en las historias de quienes vinieron antes.", "Sé un pilar de apoyo para otros. Tu estabilidad es contagiosa."] },
-            { name: 'Perthro', symbol: 'ᛈ', meaning: 'Misterio y Destino', thoughts: ["El azar es solo el nombre que le damos a las leyes que aún no comprendemos.", "Dentro de lo oculto reside la semilla de toda posibilidad. Abraza el misterio.", "El destino no está escrito en piedra, sino en las elecciones que haces en el presente."], recommendations: ["Abre tu mente a lo inesperado. No intentes predecir cada resultado hoy.", "Presta atención a tus sueños y corazonadas; el inconsciente te está hablando.", "Juega. Recupera la capacidad de asombro ante las sorpresas de la vida."] },
-            { name: 'Algiz', symbol: 'ᛉ', meaning: 'Protección y Conciencia Superior', thoughts: ["Tu mayor protección es mantener una vibración elevada y pensamientos puros.", "Como el alce, mantente alerta pero tranquilo. La intuición es tu radar espiritual.", "Estás conectado con lo divino; nada puede dañarte si permaneces en tu centro."], recommendations: ["Confía en tu 'instinto'. Si algo se siente mal, probablemente lo esté.", "Visualiza un escudo de luz a tu alrededor antes de entrar en ambientes estresantes.", "Actúa como un protector para los más débiles hoy."] },
-            { name: 'Sowilo', symbol: 'ᛊ', meaning: 'El Sol y la Integridad', thoughts: ["El éxito es inevitable cuando actúas desde la totalidad de tu ser.", "Tu luz interior no necesita permiso para brillar. Simplemente, sé tú mismo.", "La victoria es amarga si no se logra con honor e integridad."], recommendations: ["Atrévete a ser el centro de atención hoy. Comparte tus ideas con confianza.", "Busca la claridad en una situación confusa. La verdad saldrá a la luz pronto.", "Recarga tus energías. Pasa tiempo bajo el sol o haz algo que te llene de entusiasmo."] },
-            { name: 'Tiwaz', symbol: 'ᛏ', meaning: 'Justicia y Sacrificio', thoughts: ["El Guerrero Espiritual sabe que a veces hay que perder una mano para ganar la paz.", "La justicia no es venganza, sino el restablecimiento del equilibrio sagrado.", "Tu voluntad es tu flecha; asegúrate de apuntar a un blanco que valga la pena."], recommendations: ["Haz lo correcto, incluso si es el camino más difícil.", "Identifica qué estás dispuesto a sacrificar para alcanzar tu meta más alta.", "Sé disciplinado en tu práctica espiritual o en tu trabajo hoy."] },
-            { name: 'Berkano', symbol: 'ᛒ', meaning: 'Nacimiento y Crecimiento', thoughts: ["Toda nueva idea necesita un tiempo de gestación en la oscuridad del útero.", "El crecimiento real es silencioso y constante, como el de un árbol en el bosque.", "La energía femenina de nutrición es la que permite que la vida florezca."], recommendations: ["Cuida de algo vivo: una planta, una mascota o un proyecto naciente.", "Sé amable contigo mismo. El autoperdón es la mejor medicina para crecer.", "Es un excelente día para temas relacionados con la familia y el hogar."] },
-            { name: 'Ehwaz', symbol: 'ᛖ', meaning: 'Movimiento y Asociación', thoughts: ["El jinete y el caballo deben ser uno solo para cruzar el desierto con éxito.", "La confianza es el puente que nos permite avanzar hacia lo desconocido.", "El progreso real ocurre cuando coordinamos nuestras acciones con los demás."], recommendations: ["Fortalece una alianza. Habla con claridad sobre tus expectativas con tus socios.", "Muévete físicamente. Cambia tu entorno para cambiar tu perspectiva.", "Sé un compañero leal. El apoyo mutuo multiplicará tus resultados hoy."] },
-            { name: 'Mannaz', symbol: 'ᛗ', meaning: 'La Humanidad y el Ser', thoughts: ["Tú eres un microcosmos del universo. Conocerse a uno mismo es conocer el todo.", "La mente es un sirviente maravilloso pero un amo terrible. Entrénala.", "Tu humanidad es tu mayor fortaleza. No temas mostrar tu vulnerabilidad."], recommendations: ["Dedica tiempo a la meditación profunda o al estudio de la psicología.", "Busca puntos en común con las personas que te rodean en lugar de diferencias.", "Evalúa tus roles sociales. ¿Cuáles son auténticos y cuáles son máscaras?"] },
-            { name: 'Laguz', symbol: 'ᛚ', meaning: 'Agua e Intuición', thoughts: ["El agua fluye alrededor de los obstáculos. No luches, busca el camino de menor resistencia.", "Tus emociones son mareas que limpian la orilla de tu alma. Déjalas fluir.", "Confía en lo invisible. La profundidad del océano contiene tesoros que la superficie no imagina."], recommendations: ["Toma un baño consciente o pasa tiempo cerca del agua para limpiar tu energía.", "No busques respuestas lógicas hoy; deja que tu corazón te guíe.", "Escucha tus sueños. Anota lo primero que recuerdes al despertar."] },
-            { name: 'Ingwaz', symbol: 'ᛜ', meaning: 'Potencial y Almacenaje', thoughts: ["Hay una fuerza latente en ti que está esperando el momento justo para estallar.", "La introspección es el almacén de tu futura victoria. No desperdicies tu energía.", "La conclusión de un ciclo es la preparación necesaria para el siguiente gran salto."], recommendations: ["Termina lo que empezaste. No dejes cabos sueltos que drenen tu atención.", "Mantén tus planes en secreto por ahora. Deja que ganen fuerza en el silencio.", "Busca un espacio de soledad para integrar los aprendizajes de los últimos meses."] },
-            { name: 'Dagaz', symbol: 'ᛞ', meaning: 'Despertar y Transformación', thoughts: ["La noche y el día se encuentran en el alba. Los opuestos son solo caras de la misma moneda.", "La iluminación no es algo que se alcanza, es algo que se reconoce en el presente.", "Un cambio radical de perspectiva puede transformar tu mundo en un instante."], recommendations: ["Rompe con un viejo paradigma hoy. Haz algo de una manera totalmente opuesta a lo habitual.", "Observa la belleza en lo cotidiano. El despertar está en los detalles simples.", "Confía en que la oscuridad está pasando. El amanecer está garantizado."] },
-            { name: 'Othila', symbol: 'ᛟ', meaning: 'Herencia y Pertenencia', thoughts: ["Honrar a tus padres no significa repetir sus errores, sino extraer la sabiduría de su historia.", "Tu hogar está donde tu corazón se siente en paz y alineado con su propósito.", "El legado más valioso que dejarás no son las cosas, sino el impacto en las almas de otros."], recommendations: ["Conecta con tus raíces familiares. Llama a un pariente o mira fotos antiguas.", "Haz algo para embellecer o bendecir tu espacio físico. Tu casa es tu refugio.", "Define qué valores quieres que sean tu herencia para el mundo."] }
+            { 
+                name: 'Fehu', 
+                symbol: 'ᚠ', 
+                meaning: 'Riqueza y Energía Móvil', 
+                thoughts: [
+                    "La verdadera riqueza no es lo que acumulas, sino lo que eres capaz de poner en movimiento.",
+                    "El 'susurro de los dioses' te recuerda que la abundancia es una frecuencia, no solo un número.",
+                    "Como energía móvil, Fehu te pide que compartas tu brillo para que este se multiplique.",
+                    "La posesión estancada se convierte en carga; el flujo es vida.",
+                    "Tu valor no reside en lo que tienes, sino en la generosidad de tu espíritu.",
+                    "La riqueza es un medio para el crecimiento, nunca el fin último del guerrero.",
+                    "Toda ganancia material debe ser equilibrada con un propósito espiritual.",
+                    "El flujo de la vida es circular: lo que das con honestidad, vuelve transformado.",
+                    "Abundancia es tener la libertad de crear y la voluntad de servir.",
+                    "No temas al vacío; es el espacio necesario para que entre lo nuevo.",
+                    "La energía del dinero es un espejo de tus miedos o de tu confianza.",
+                    "El éxito material es una prueba de responsabilidad, no un premio al ego.",
+                    "Siembra hoy con desapego para cosechar mañana con gratitud.",
+                    "La riqueza móvil nutre a la comunidad; la riqueza estática asfixia al alma.",
+                    "Tu talento es tu capital más valioso; ponlo a trabajar para el bien común.",
+                    "La prosperidad comienza con un pensamiento de suficiencia.",
+                    "El oro del espíritu brilla más fuerte en tiempos de escasez exterior.",
+                    "Cada intercambio es una oportunidad para practicar la integridad.",
+                    "La verdadera ganancia es aquella que no resta valor a los demás.",
+                    "Camina con paso firme sabiendo que el universo provee al que actúa con rectitud."
+                ], 
+                recommendations: ["Hoy es un día para invertir en ti mismo o en un proyecto que beneficie a otros.", "Revisa tu relación con lo material.", "Busca una forma de ser generoso de manera inesperada."] 
+            },
+            { 
+                name: 'Uruz', 
+                symbol: 'ᚢ', 
+                meaning: 'Fuerza Vital y Salud', 
+                thoughts: [
+                    "La fuerza del uro es bruta; el Guerrero Espiritual es quien le da dirección y propósito.",
+                    "Tu cuerpo es el templo donde reside tu poder; escúchalo antes de que grite.",
+                    "El cambio de forma es necesario para sobrevivir. No temas a tu propia potencia interna.",
+                    "La vitalidad nace de la conexión profunda con la tierra y sus ritmos.",
+                    "Tu voluntad es el timón que gobierna la tormenta de tus instintos.",
+                    "La salud no es la ausencia de enfermedad, sino la presencia de armonía vital.",
+                    "Acepta tu lado salvaje, pero no dejes que te devore.",
+                    "La resistencia física es el reflejo de la tenacidad del alma.",
+                    "La fuerza verdadera es la que se usa para proteger y construir.",
+                    "Transforma tu debilidad en el combustible de tu próxima victoria.",
+                    "El descanso consciente es tan vital como el esfuerzo máximo.",
+                    "Tu respiración es el puente entre tu cuerpo y el infinito.",
+                    "No confundas agresividad con poder; el poder real es silencioso.",
+                    "La energía de Uruz te pide que dejes morir lo viejo para renacer más fuerte.",
+                    "Sana tus heridas internas para que dejen de drenar tu fuerza externa.",
+                    "La disciplina es la forma más alta de amor propio.",
+                    "Confía en la sabiduría biológica de tus células.",
+                    "La fuerza se cultiva en la superación de los límites autoimpuestos.",
+                    "Eres más fuerte de lo que tu mente se atreve a admitir.",
+                    "La salud es el equilibrio dinámico entre la acción y la quietud."
+                ], 
+                recommendations: ["Realiza una actividad que te haga sentir vital.", "Enfrenta ese reto que te intimidaba.", "Purifica tu entorno físico."] 
+            },
+            { 
+                name: 'Thurisaz', 
+                symbol: 'ᚦ', 
+                meaning: 'Protección y Conflicto', 
+                thoughts: [
+                    "La espina protege la rosa, pero también puede herir. Elige bien tus batallas.",
+                    "A veces el mayor enemigo no está afuera, sino en la resistencia que ponemos al cambio.",
+                    "El conflicto es a menudo el preludio de una gran revelación. Observa el umbral.",
+                    "La defensa más fuerte es un espíritu transparente e íntegro.",
+                    "No golpees sin necesidad; el eco de tu ataque volverá a ti.",
+                    "La protección nace del conocimiento de tus propios límites.",
+                    "La crisis es el martillo que forja el acero de tu carácter.",
+                    "Aprende a decir 'no' con la firmeza del rayo y la calma del aire.",
+                    "El gigante que temes es a menudo una sombra de tu propio ego.",
+                    "Mantente alerta: la complacencia es el muro más fácil de derribar.",
+                    "Toda fuerza destructiva puede ser canalizada hacia la limpieza necesaria.",
+                    "El caos es solo orden que aún no has comprendido.",
+                    "La espina de Thurisaz te recuerda que el crecimiento requiere protección.",
+                    "La ira sin control es un arma que te hiere a ti mismo.",
+                    "Enfréntate a tus miedos con la autoridad de quien sabe quién es.",
+                    "La paz verdadera es la que se sostiene en medio de la tormenta.",
+                    "No todos los que te contradicen son tus enemigos.",
+                    "El umbral es el lugar de mayor peligro y de mayor transformación.",
+                    "La fuerza reactiva es debilidad; la fuerza consciente es soberanía.",
+                    "Afila tu mente para que no tengas que usar tu espada."
+                ], 
+                recommendations: ["No actúes por impulso hoy.", "Medita sobre aquello que te hace sentir a la defensiva.", "Establece límites saludables."] 
+            },
+            { 
+                name: 'Ansuz', 
+                symbol: 'ᚨ', 
+                meaning: 'Comunicación y Sabiduría', 
+                thoughts: [
+                    "La palabra es el vehículo del espíritu. Habla con la verdad y escucharás la sabiduría.",
+                    "Presta atención a las 'coincidencias'; son mensajes del inconsciente buscando tu atención.",
+                    "El conocimiento se vuelve sabiduría solo cuando se aplica con compasión.",
+                    "El silencio es el espacio donde los dioses susurran sus secretos.",
+                    "Tu voz tiene el poder de bendecir o de maldecir; elígela con cuidado.",
+                    "La inspiración es un soplo divino que solo entra en mentes abiertas.",
+                    "Aprende a escuchar lo que se dice entre líneas y más allá de los sonidos.",
+                    "La comunicación honesta es el puente que une dos almas.",
+                    "Tu vida es un mensaje; asegúrate de que valga la pena leerlo.",
+                    "La sabiduría no se acumula, se vive en cada gesto presente.",
+                    "El susurro del viento trae noticias del origen; detente y escucha.",
+                    "Hablar es plata, escuchar es oro, comprender es diamante.",
+                    "La claridad mental nace de la honestidad emocional.",
+                    "Sé un canal para la verdad, no un eco de la opinión ajena.",
+                    "La intuición es la voz del espíritu guiando tu razón.",
+                    "Toda señal externa es un reflejo de una necesidad interna.",
+                    "El lenguaje es una herramienta mágica; úsalo para crear realidades.",
+                    "Busca el conocimiento en los libros, pero la sabiduría en la experiencia.",
+                    "La verdadera inteligencia es saber que siempre hay algo más que aprender.",
+                    "La palabra del Guerrero es su vínculo más sagrado."
+                ], 
+                recommendations: ["Escucha más de lo que hablas hoy.", "Escribe tus pensamientos en un diario.", "Busca el consejo de un mentor."] 
+            },
+            { 
+                name: 'Raido', 
+                symbol: 'ᚱ', 
+                meaning: 'El Viaje y el Ritmo', 
+                thoughts: [
+                    "El camino es el destino. Si el ritmo es el correcto, llegarás donde debes estar.",
+                    "La vida es una danza de ciclos. Aprende a fluir con la música del cosmos.",
+                    "Viajar hacia afuera es a menudo el pretexto para el viaje más importante: el interior.",
+                    "No temas al movimiento; lo estancado es lo que muere.",
+                    "La dirección es más importante que la velocidad.",
+                    "Tu brújula interna nunca falla si la mantienes limpia de juicios.",
+                    "Cada paso es una elección; cada elección es un destino.",
+                    "El ritmo de tu respiración marca el compás de tu existencia.",
+                    "Acepta los desvíos del camino; a menudo son los atajos del alma.",
+                    "La libertad es la capacidad de elegir tu propio sendero.",
+                    "El viajero sabio no lleva equipaje innecesario en su mente.",
+                    "Alinea tu voluntad personal con el orden cósmico.",
+                    "La vida te pide hoy que tomes las riendas de tu propia carroza.",
+                    "El viaje espiritual requiere tanto coraje como el viaje físico.",
+                    "No busques el final del camino; el final es solo un nuevo comienzo.",
+                    "La constancia es la llave que abre todas las puertas cerradas.",
+                    "Aprende a descansar en el movimiento, no en la inactividad.",
+                    "El ritmo de la naturaleza es perfecto; confía en sus tiempos.",
+                    "Eres el conductor de tu vida, no un simple pasajero del destino.",
+                    "Camina ligero, camina con propósito, camina con alegría."
+                ], 
+                recommendations: ["Toma una ruta diferente para ir al trabajo.", "Planifica tu próximo paso importante.", "Confía en el proceso."] 
+            },
+            { 
+                name: 'Kenaz', 
+                symbol: 'ᚲ', 
+                meaning: 'Conocimiento y Luz', 
+                thoughts: [
+                    "La antorcha ilumina el camino, pero también consume lo viejo para crear calor.",
+                    "La creatividad es la expresión pura del alma. Deja que tu fuego interno brille.",
+                    "La claridad mental llega cuando dejamos de buscar afuera y encendemos la luz interna.",
+                    "El conocimiento es poder solo cuando se transforma en acción consciente.",
+                    "La pasión es el fuego que anima tus sueños; no dejes que se apague.",
+                    "La verdad es una luz que a veces deslumbra antes de iluminar.",
+                    "Sé como la llama: siempre apuntando hacia lo alto, sin importar el viento.",
+                    "La curiosidad es la chispa que inicia el incendio de la sabiduría.",
+                    "Transforma tu oscuridad en el lienzo donde pintarás tu luz.",
+                    "La maestría es el resultado de pulir tu fuego con la piedra de la disciplina.",
+                    "Un solo pensamiento luminoso puede disipar años de sombras.",
+                    "La visión clara requiere un corazón valiente.",
+                    "No escondas tu luz por miedo al juicio; el mundo necesita tu brillo.",
+                    "La energía de Kenaz es la del artesano que crea belleza desde el esfuerzo.",
+                    "El calor de tu compasión puede derretir el hielo de cualquier conflicto.",
+                    "Brilla con humildad; el sol no necesita anunciar que ha salido.",
+                    "La iluminación es reconocer la divinidad en lo cotidiano.",
+                    "El fuego purifica lo que ya no sirve para dejar espacio a la esencia.",
+                    "La inspiración llega trabajando; no esperes sentado a que la musa te visite.",
+                    "Tu mente es una antorcha que debe ser alimentada con la verdad."
+                ], 
+                recommendations: ["Inicia ese proyecto creativo postergado.", "Estudia algo que te apasione.", "Sé la luz para alguien hoy."] 
+            },
+            { 
+                name: 'Gebo', 
+                symbol: 'ᚷ', 
+                meaning: 'El Regalo y la Unión', 
+                thoughts: [
+                    "Todo intercambio sagrado requiere equilibrio. Dar es tan importante como saber recibir.",
+                    "Las uniones verdaderas son contratos de alma que nos ayudan a crecer.",
+                    "El mayor regalo que puedes ofrecer es tu presencia plena y honesta.",
+                    "La generosidad sin expectativas es la forma más alta de libertad.",
+                    "Toda relación es un espejo donde se refleja tu propio ser.",
+                    "La gratitud es la memoria del corazón para los regalos de la vida.",
+                    "No sacrifiques tu esencia por una unión; la verdadera pareja potencia tu ser.",
+                    "El equilibrio entre el 'Yo' y el 'Nosotros' es el arte de la convivencia.",
+                    "Un regalo dado con amor no tiene precio, solo valor infinito.",
+                    "La cooperación es la fuerza que mueve montañas.",
+                    "Aprende a recibir con humildad y a dar con alegría.",
+                    "La hospitalidad del alma abre puertas que la razón mantiene cerradas.",
+                    "Toda promesa es un hilo que te une al otro; cuídalo.",
+                    "La abundancia nace de la capacidad de compartir lo que se tiene.",
+                    "En la unión de los opuestos nace la creación.",
+                    "No pidas lo que no estás dispuesto a ofrecer.",
+                    "La lealtad es la base de todo contrato sagrado.",
+                    "El amor es el regalo que se multiplica cuando se divide.",
+                    "Busca la armonía en cada trato, en cada palabra, en cada gesto.",
+                    "Eres un regalo para el mundo; actúa en consecuencia."
+                ], 
+                recommendations: ["Ten un detalle con alguien cercano.", "Acepta con gratitud lo que el día te ofrezca.", "Busca la armonía en tus relaciones."] 
+            },
+            { 
+                name: 'Wunjo', 
+                symbol: 'ᚹ', 
+                meaning: 'Alegría y Éxito', 
+                thoughts: [
+                    "La felicidad no es una meta, sino el subproducto de vivir en armonía con tu verdad.",
+                    "La gloria llega cuando el esfuerzo y la pasión se encuentran en el punto justo.",
+                    "Disfruta del presente; el ayer es un sueño y el mañana una promise.",
+                    "La alegría verdadera nace de la paz interna, no de las circunstancias externas.",
+                    "El éxito es la capacidad de ir de fracaso en fracaso sin perder el entusiasmo.",
+                    "La risa es el lenguaje de los dioses; úsala para sanar.",
+                    "La armonía es el resultado de afinar tus pensamientos con tus actos.",
+                    "Celebra tus logros, pero no te quedes a vivir en ellos.",
+                    "La belleza está en los ojos del que ha decidido ser feliz.",
+                    "La victoria más grande es la que se logra sobre uno mismo.",
+                    "La plenitud no es tenerlo todo, sino no necesitar nada más en este instante.",
+                    "Tu bienestar es la prioridad del Guerrero en tiempo de paz.",
+                    "Rodéate de aquello que eleve tu espíritu.",
+                    "La felicidad compartida es doble alegría.",
+                    "No dejes que las nubes de hoy te hagan olvidar que el sol sigue allí.",
+                    "La satisfacción es el reposo del justo después de la batalla.",
+                    "Aprecia lo simple; allí reside la magia más potente.",
+                    "La esperanza es el combustible que mantiene viva la llama del éxito.",
+                    "Sé feliz por decisión, no por casualidad.",
+                    "Tu sonrisa es un escudo contra la negatividad del mundo."
+                ], 
+                recommendations: ["Celebra algo hoy, por pequeño que sea.", "Rodéate de personas positivas.", "Permítete un momento de ocio puro."] 
+            },
+            { 
+                name: 'Hagalaz', 
+                symbol: 'ᚼ', 
+                meaning: 'Crisis y Transformación', 
+                thoughts: [
+                    "El granizo destruye la cosecha, pero riega la tierra para el futuro. Acepta el cambio.",
+                    "Las estructuras que se rompen son aquellas que ya no podían sostener tu crecimiento.",
+                    "En el centro de la tormenta reside la calma del observador. Sé ese observador.",
+                    "La crisis es la invitación del universo para que despiertes.",
+                    "No intentes detener lo que debe caer; prepárate para construir sobre las ruinas.",
+                    "La transformación radical requiere la muerte simbólica de tus viejas ideas.",
+                    "El caos es la materia prima de una nueva creación.",
+                    "Acepta lo inevitable con la dignidad del Guerrero.",
+                    "El dolor es el despertador de la conciencia dormida.",
+                    "Nada es permanente, excepto el cambio mismo.",
+                    "La purificación a menudo llega bajo formas que no comprendemos.",
+                    "Confía en que el universo sabe lo que hace, incluso cuando duele.",
+                    "La resiliencia es la capacidad de florecer después de la tormenta.",
+                    "No eres lo que te sucede, sino lo que decides hacer con ello.",
+                    "La crisis te despoja de lo accesorio para que encuentres lo esencial.",
+                    "Suelta el control; la vida tiene sus propios planes para ti.",
+                    "El hielo de Hagalaz se derretirá para fertilizar tu mañana.",
+                    "La verdadera seguridad no reside en el exterior, sino en tu centro inmutable.",
+                    "Mira más allá del desastre; hay una semilla de orden esperando brotar.",
+                    "La tormenta limpia el aire; respira profundamente cuando pase."
+                ], 
+                recommendations: ["No luches contra lo inevitable.", "Identifica un hábito destructivo y elimínalo.", "Confía en el proceso de limpieza."] 
+            },
+            { 
+                name: 'Nauthiz', 
+                symbol: 'ᚾ', 
+                meaning: 'Necesidad y Resistencia', 
+                thoughts: [
+                    "La carencia es la chispa de la invención. ¿Qué puedes crear con lo que tienes?",
+                    "El dolor es un maestro que nos señala dónde debemos prestar atención.",
+                    "La verdadera libertad surge cuando dejamos de ser esclavos de nuestros deseos inmediatos.",
+                    "La resistencia es el entrenamiento necesario para fortalecer tu voluntad.",
+                    "La necesidad te obliga a priorizar lo que realmente importa.",
+                    "Acepta tus limitaciones hoy para poder superarlas mañana.",
+                    "La fricción genera calor; usa ese calor para encender tu fuego interno.",
+                    "El destino te pone a prueba para ver qué tan firme es tu propósito.",
+                    "No culpes a las circunstancias; busca la lección que esconden.",
+                    "La paciencia es la forma más sabia de resistencia.",
+                    "La austeridad limpia la mente y fortalece el espíritu.",
+                    "Aprende a vivir con lo esencial y descubrirás que te sobra todo.",
+                    "La escasez exterior es a menudo una invitación a la riqueza interior.",
+                    "El 'No' del universo es a menudo un 'Todavía no' o un 'Por otro camino'.",
+                    "Tu voluntad es más fuerte que cualquier obstáculo externo.",
+                    "La disciplina en medio de la carencia es la marca del Guerrero.",
+                    "No te rindas ante la fatiga; es el umbral del segundo aliento.",
+                    "La necesidad es la madre de la creatividad.",
+                    "Encuentra la paz en medio de la restricción.",
+                    "La resistencia es solo el peso que te hace crecer los músculos del alma."
+                ], 
+                recommendations: ["Practica la austeridad hoy.", "Sé paciente con tus limitaciones.", "Ayuda a alguien que tenga menos que tú."] 
+            },
+            { 
+                name: 'Isa', 
+                symbol: 'ᛁ', 
+                meaning: 'Hielo y Pausa', 
+                thoughts: [
+                    "El hielo preserva y detiene. A veces, la acción más poderosa es no hacer nada.",
+                    "En la quietud del frío, el ego se cristaliza y puede ser observado con claridad.",
+                    "No fuerces el deshielo. Cada estación tiene su propósito y su tiempo.",
+                    "La pausa es el espacio donde se gesta el futuro movimiento.",
+                    "El silencio es el lenguaje del alma cuando las palabras ya no bastan.",
+                    "La inactividad no es pereza, es ahorro estratégico de energía.",
+                    "Observa la belleza de la forma estática antes de que se transforme.",
+                    "El frío purifica la visión al eliminar las distracciones del calor.",
+                    "Mantente firme en tu centro mientras el mundo se detiene a tu alrededor.",
+                    "La paciencia es el arte de esperar sin ansiedad.",
+                    "El hielo de Isa te protege de las influencias externas que no necesitas.",
+                    "Reflexiona sobre tus planes antes de ponerlos en marcha.",
+                    "La claridad llega cuando el agua de la mente se aquieta por completo.",
+                    "No intentes correr sobre el hielo; camina con precaución y conciencia.",
+                    "Aprovecha el invierno de tu alma para fortalecer tus raíces.",
+                    "La introspección es el viaje más productivo en tiempos de pausa.",
+                    "Acepta el 'Detente' de la vida como un regalo de protección.",
+                    "La soledad es el taller donde se forja la independencia.",
+                    "Nada dura para siempre, ni siquiera el invierno más crudo.",
+                    "En la quietud total encontrarás las respuestas que el ruido ocultaba."
+                ], 
+                recommendations: ["Medita en soledad hoy.", "Pospón decisiones importantes.", "Enfócate en fortalecer tu centro interno."] 
+            },
+            { 
+                name: 'Jera', 
+                symbol: 'ᛃ', 
+                meaning: 'Cosecha y Ciclos Naturales', 
+                thoughts: [
+                    "Has sembrado con esfuerzo; ahora es tiempo de recibir con humildad.",
+                    "La naturaleza no tiene prisa, y sin embargo, todo llega a completarse.",
+                    "Honra tus procesos. Cada paso del ciclo es vital para el resultado final.",
+                    "La constancia es la madre de la buena fortuna.",
+                    "Toda acción tiene su reacción; toda siembra su cosecha.",
+                    "La paciencia es la virtud que permite que el fruto madure.",
+                    "Disfruta del éxito de hoy, pero no olvides preparar la tierra para mañana.",
+                    "El tiempo es tu aliado, no tu enemigo.",
+                    "La justicia cósmica se manifiesta en los resultados de tus actos.",
+                    "Celebra la abundancia que has co-creado con el universo.",
+                    "El ciclo de la vida es perfecto en su eterno retorno.",
+                    "No busques resultados inmediatos; busca procesos auténticos.",
+                    "La gratitud es el abono que hace que la próxima cosecha sea mayor.",
+                    "Aprende de los errores del pasado para sembrar mejor en el presente.",
+                    "La prosperidad es el flujo natural de quien actúa con integridad.",
+                    "Toda recompensa tiene un antecedente de esfuerzo consciente.",
+                    "Confía en el ritmo de las estaciones de tu vida.",
+                    "La madurez es saber esperar el momento justo para actuar.",
+                    "Tu trabajo bien hecho es tu mejor carta de recomendación ante el destino.",
+                    "La paz llega cuando comprendes que todo tiene su tiempo bajo el sol."
+                ], 
+                recommendations: ["Recoge los frutos de un trabajo anterior.", "Planifica a largo plazo.", "Agradece a quienes te ayudaron."] 
+            },
+            { 
+                name: 'Eihwaz', 
+                symbol: 'ᛇ', 
+                meaning: 'Resiliencia y Conexión', 
+                thoughts: [
+                    "Como el tejo, eres un puente entre la tierra y el cielo, entre la vida y la muerte.",
+                    "La verdadera fuerza es flexible. Aquello que no se dobla, se rompe ante el viento.",
+                    "Tus raíces son más profundas de lo que crees. Confía en tu herencia espiritual.",
+                    "La resiliencia es la capacidad de transformar el veneno en medicina.",
+                    "Mantén tu visión clara incluso en la oscuridad del túnel.",
+                    "La muerte de una etapa es el nacimiento necesario de la siguiente.",
+                    "Conecta con tu propósito superior para encontrar la fuerza que te falta.",
+                    "El Guerrero sabe que la retirada estratégica es parte de la victoria final.",
+                    "Tu integridad es tu escudo más impenetrable.",
+                    "La vida es un continuo; no temas a los finales.",
+                    "Busca la estabilidad en medio del cambio permanente.",
+                    "Eres un canal para energías antiguas que buscan expresarse a través de ti.",
+                    "La paciencia y la persistencia conquistan todas las cosas.",
+                    "La sabiduría ancestral reside en tus huesos; escúchala.",
+                    "Protege tus sueños con la tenacidad del tejo milenario.",
+                    "La transformación es un proceso doloroso pero liberador.",
+                    "Confía en tu capacidad de regeneración.",
+                    "El equilibrio entre los opuestos es la base de la magia rúnica.",
+                    "Mantente erguido, sin importar el peso que lleves sobre los hombros.",
+                    "La conexión con lo divino es tu derecho de nacimiento."
+                ], 
+                recommendations: ["Mantente firme en tus valores.", "Conecta con tus ancestros.", "Sé un pilar de apoyo para otros."] 
+            },
+            { 
+                name: 'Perthro', 
+                symbol: 'ᛈ', 
+                meaning: 'Misterio y Destino', 
+                thoughts: [
+                    "El azar es solo el nombre que le damos a las leyes que aún no comprendemos.",
+                    "Dentro de lo oculto reside la semilla de toda posibilidad. Abraza el misterio.",
+                    "El destino no está escrito en piedra, sino en las elecciones que haces en el presente.",
+                    "La vida es un juego sagrado; aprende las reglas pero mantén el asombro.",
+                    "Lo que buscas te está buscando a ti a través de los velos del tiempo.",
+                    "Acepta lo inesperado como una señal de dirección.",
+                    "El inconsciente es un océano de tesoros esperando ser descubiertos.",
+                    "La sincronicidad es el guiño del universo a tu búsqueda consciente.",
+                    "No intentes controlarlo todo; deja espacio para la magia.",
+                    "Tu intuición es la brújula en el laberinto del destino.",
+                    "Hay fuerzas operando más allá de tu visión limitada; confía.",
+                    "El cubilete de los dados se agita hoy para ti; prepárate para actuar.",
+                    "El secreto es a menudo la clave que abre la puerta de la libertad.",
+                    "Nada sucede por casualidad en el camino del autoconocimiento.",
+                    "Aprende a leer los signos en lo cotidiano.",
+                    "La suerte favorece a la mente preparada y al corazón valiente.",
+                    "Lo oculto se revela a quien tiene la paciencia de observar.",
+                    "Tu destino es co-creado entre tu voluntad y el azar cósmico.",
+                    "Abraza la incertidumbre; es el espacio de la libertad pura.",
+                    "Toda pregunta honesta recibe una respuesta simbólica."
+                ], 
+                recommendations: ["Abre tu mente a lo inesperado.", "Presta atención a tus corazonadas.", "Juega y recupera el asombro."] 
+            },
+            { 
+                name: 'Algiz', 
+                symbol: 'ᛉ', 
+                meaning: 'Protección y Conciencia Superior', 
+                thoughts: [
+                    "Tu mayor protección es mantener una vibración elevada y pensamientos puros.",
+                    "Como el alce, mantente alerta pero tranquilo. La intuición es tu radar espiritual.",
+                    "Estás conectado con lo divino; nada puede dañarte si permaneces en tu centro.",
+                    "La protección nace de la alineación con tu propósito superior.",
+                    "Tus guías espirituales están más cerca de lo que imaginas; pide ayuda.",
+                    "La conciencia es el escudo más fuerte contra la negatividad.",
+                    "Mantén tus pensamientos elevados para atraer realidades luminosas.",
+                    "La verdadera seguridad es un estado interno, no una condición externa.",
+                    "Sé un canal para la luz y la oscuridad se disipará a tu paso.",
+                    "Escucha los mensajes del espíritu en el silencio de tu corazón.",
+                    "Tu conexión con el origen es inquebrantable.",
+                    "Actúa con la autoridad de quien se sabe protegido por el universo.",
+                    "La oración y la meditación son tus armas de defensa más eficaces.",
+                    "No temas a las sombras; solo indican que hay una luz brillando cerca.",
+                    "Tu integridad atrae la protección de las fuerzas del orden cósmico.",
+                    "Mantente vigilante ante tus propias sombras internas.",
+                    "La paz interior es la base de toda victoria exterior.",
+                    "Confía en el susurro de tu alma por encima del ruido del mundo.",
+                    "Eres un ser espiritual viviendo una experiencia humana; no lo olvides.",
+                    "La divinidad reside en ti y a tu alrededor."
+                ], 
+                recommendations: ["Confía en tu instinto hoy.", "Visualiza un escudo de luz a tu alrededor.", "Actúa como protector para otros."] 
+            },
+            { 
+                name: 'Sowilo', 
+                symbol: 'ᛊ', 
+                meaning: 'El Sol y la Integridad', 
+                thoughts: [
+                    "El éxito es inevitable cuando actúas desde la totalidad de tu ser.",
+                    "Tu luz interior no necesita permiso para brillar. Simplemente, sé tú mismo.",
+                    "La victoria es amarga si no se logra con honor e integridad.",
+                    "La claridad total disipa todas las dudas; actúa ahora.",
+                    "Eres el sol de tu propio sistema; ilumina tu vida y la de los demás.",
+                    "La energía vital fluye con fuerza a través de ti; canalízala con sabiduría.",
+                    "La integridad es hacer lo correcto incluso cuando nadie te mira.",
+                    "Busca la excelencia, no la perfección.",
+                    "Tu carisma es un regalo; úsalo para inspirar, nunca para manipular.",
+                    "La salud y la vitalidad son el reflejo de un espíritu en paz.",
+                    "Brilla con tal fuerza que las sombras no tengan donde esconderse.",
+                    "La victoria más dulce es la que beneficia a todos los involucrados.",
+                    "Confía en tu poder creativo para transformar cualquier situación.",
+                    "El sol sale para todos; sé generoso con tu luz.",
+                    "La honestidad contigo mismo es el primer paso hacia la iluminación.",
+                    "Actúa con entusiasmo y el universo conspirará a tu favor.",
+                    "Mantén tu visión enfocada en lo más alto.",
+                    "La integridad es el pegamento que mantiene unidos tus sueños y tu realidad.",
+                    "La claridad mental es el resultado de un corazón puro.",
+                    "Sowilo te promete el éxito si mantienes tu rumbo con rectitud."
+                ], 
+                recommendations: ["Comparte tus ideas con confianza.", "Busca la claridad en situaciones confusas.", "Recarga tus energías al sol."] 
+            },
+            { 
+                name: 'Tiwaz', 
+                symbol: 'ᛏ', 
+                meaning: 'Justicia y Sacrificio', 
+                thoughts: [
+                    "El Guerrero Espiritual sabe que a veces hay que perder una mano para ganar la paz.",
+                    "La justicia no es venganza, sino el restablecimiento del equilibrio sagrado.",
+                    "Tu voluntad es tu flecha; asegúrate de apuntar a un blanco que valga la pena.",
+                    "El sacrificio consciente es la puerta a la maestría.",
+                    "La victoria requiere disciplina, honor y una causa justa.",
+                    "Mantente firme en tu verdad, incluso si te quedas solo.",
+                    "La ley cósmica es implacable pero justa; confía en ella.",
+                    "El valor no es la ausencia de miedo, sino la acción a pesar de él.",
+                    "Sé un líder que sirve, no un amo que exige.",
+                    "La integridad en la batalla es más importante que el resultado final.",
+                    "Acepta tu responsabilidad con la frente en alto.",
+                    "La justicia comienza en tu propio trato hacia ti mismo.",
+                    "El camino del Guerrero es un camino de rectitud y sacrificio.",
+                    "Tu palabra es tu ley; cúmplela siempre.",
+                    "La fuerza sin justicia es tiranía; la justicia sin fuerza es impotencia.",
+                    "Aprende a soltar lo que amas por lo que es correcto.",
+                    "La disciplina es el puente entre tus metas y tus logros.",
+                    "La victoria espiritual es eterna; la material es pasajera.",
+                    "Defiende lo justo con la calma del sabio y la fuerza del guerrero.",
+                    "Eres el arquitecto de tu propia justicia interna."
+                ], 
+                recommendations: ["Haz lo correcto, aunque sea difícil.", "Identifica qué estás dispuesto a sacrificar.", "Sé disciplinado hoy."] 
+            },
+            { 
+                name: 'Berkano', 
+                symbol: 'ᛒ', 
+                meaning: 'Nacimiento y Crecimiento', 
+                thoughts: [
+                    "Toda nueva idea necesita un tiempo de gestación en la oscuridad del útero.",
+                    "El crecimiento real es silencioso y constante, como el de un árbol en el bosque.",
+                    "La energía femenina de nutrición es la que permite que la vida florezca.",
+                    "Sé paciente con tus propios procesos de maduración.",
+                    "La ternura es una forma de poder que el mundo a menudo olvida.",
+                    "Nutre tus sueños con cuidado y verás cómo cobran vida propia.",
+                    "El renacimiento es posible en cada instante de tu existencia.",
+                    "La fertilidad del espíritu atrae todas las bendiciones materiales.",
+                    "Protege lo nuevo con amor y firmeza.",
+                    "El crecimiento requiere soltar la cáscara de lo viejo.",
+                    "La vida siempre encuentra una forma de brotar, incluso en el asfalto.",
+                    "Sé como la madre tierra: generosa, paciente y dadora de vida.",
+                    "La belleza de Berkano reside en la pureza de sus comienzos.",
+                    "Cuida tu cuerpo y tu mente como el jardín más preciado.",
+                    "La creatividad florece en ambientes de seguridad y amor.",
+                    "El hogar es el refugio donde el alma se recarga para crecer.",
+                    "Siembra semillas de bondad en cada encuentro de hoy.",
+                    "La evolución es un proceso natural; no la fuerces, permítela.",
+                    "La curación llega a través del cuidado constante y amoroso.",
+                    "Eres una obra en constante creación y crecimiento."
+                ], 
+                recommendations: ["Cuida de algo vivo hoy.", "Sé amable contigo mismo.", "Dedica tiempo a tu familia o hogar."] 
+            },
+            { 
+                name: 'Ehwaz', 
+                symbol: 'ᛖ', 
+                meaning: 'Movimiento y Asociación', 
+                thoughts: [
+                    "El jinete y el caballo deben ser uno solo para cruzar el desierto con éxito.",
+                    "La confianza es el puente que nos permite avanzar hacia lo desconocido.",
+                    "El progreso real ocurre cuando coordinamos nuestras acciones con los demás.",
+                    "Busca la armonía en tus asociaciones; la unión hace la fuerza.",
+                    "El movimiento hacia adelante requiere lealtad y cooperación mutua.",
+                    "Aprende a confiar en los demás tanto como en ti mismo.",
+                    "La dualidad equilibrada es la base de todo progreso sostenible.",
+                    "Toda relación es un vehículo para tu evolución espiritual.",
+                    "La comunicación fluida es el combustible de toda asociación exitosa.",
+                    "Camina al lado de tus aliados, ni delante ni detrás.",
+                    "El cambio de posición te ofrece una nueva perspectiva de la realidad.",
+                    "La adaptabilidad es la marca del viajero sabio.",
+                    "Tu éxito está ligado al éxito de quienes te rodean.",
+                    "La lealtad es un camino de ida y vuelta.",
+                    "El movimiento constante evita el estancamiento del alma.",
+                    "Busca socios que complementen tus debilidades con sus fortalezas.",
+                    "La confianza se construye con actos, no con palabras.",
+                    "Acepta la ayuda que se te ofrece con humildad y gratitud.",
+                    "La sinergia crea resultados que ninguno podría lograr solo.",
+                    "Avanza con ritmo, avanza con confianza, avanza acompañado."
+                ], 
+                recommendations: ["Fortalece una alianza hoy.", "Muévete físicamente para cambiar de aire.", "Sé un compañero leal."] 
+            },
+            { 
+                name: 'Mannaz', 
+                symbol: 'ᛗ', 
+                meaning: 'La Humanidad y el Ser', 
+                thoughts: [
+                    "Tú eres un microcosmos del universo. Conocerse a uno mismo es conocer el todo.",
+                    "La mente es un sirviente maravilloso pero un amo terrible. Entrénala.",
+                    "Tu humanidad es tu mayor fortaleza. No temas mostrar tu vulnerabilidad.",
+                    "Somos hilos en el mismo tejido; lo que le haces al otro, te lo haces a ti.",
+                    "La verdadera inteligencia es la que se usa para el bien común.",
+                    "Busca la divinidad dentro de tu propia forma humana.",
+                    "El autoconocimiento es la base de toda libertad verdadera.",
+                    "Sé un faro de conciencia en medio de la ignorancia del mundo.",
+                    "La cultura y la sabiduría son los tesoros de la humanidad.",
+                    "Acepta tus sombras para poder integrarlas en tu luz.",
+                    "La cooperación social es el reflejo de la armonía interna.",
+                    "No te pierdas en el ego; recuerda tu conexión con la totalidad.",
+                    "La mente clara es el espejo donde se refleja la verdad universal.",
+                    "Tu vida es una oportunidad para elevar la conciencia colectiva.",
+                    "Sé humilde en tu sabiduría y valiente en tu ignorancia.",
+                    "La empatía es el pegamento que une a los seres humanos.",
+                    "Reflexiona sobre tu lugar en el orden de las cosas.",
+                    "La evolución humana es una tarea individual con impacto global.",
+                    "Eres el resultado de miles de años de historia; hónralos.",
+                    "La paz mundial comienza con la paz en tu propia mente."
+                ], 
+                recommendations: ["Dedica tiempo a la introspección.", "Busca puntos en común con los demás.", "Evalúa tus roles sociales."] 
+            },
+            { 
+                name: 'Laguz', 
+                symbol: 'ᛚ', 
+                meaning: 'Agua e Intuición', 
+                thoughts: [
+                    "El agua fluye alrededor de los obstáculos. No luches, busca el camino de menor resistencia.",
+                    "Tus emociones son mareas que limpian la orilla de tu alma. Déjalas fluir.",
+                    "Confía en lo invisible. La profundidad del océano contiene tesoros que la superficie no imagina.",
+                    "La intuición es la brújula de tu espíritu; nunca la ignores.",
+                    "Límpiate de las energías viejas como el río se limpia en su curso.",
+                    "La vida es fluida; no intentes congelar el presente.",
+                    "Tus sentimientos son guías, no cárceles; aprende a navegarlos.",
+                    "La flexibilidad es la clave para sobrevivir a las tormentas de la vida.",
+                    "Sumergirte en tu inconsciente es el acto de valor más grande.",
+                    "Deja que la vida te lleve donde necesitas estar, no solo donde quieres ir.",
+                    "La purificación emocional es necesaria para la claridad mental.",
+                    "Confía en tu capacidad de adaptación infinita.",
+                    "El agua que no corre se pudre; mantén tu energía en movimiento.",
+                    "Escucha el susurro de tu voz interior por encima del ruido externo.",
+                    "La creatividad nace de las profundidades emocionales.",
+                    "La paz es como un lago tranquilo que refleja el cielo.",
+                    "No temas a tus profundidades; allí reside tu verdadera fuerza.",
+                    "La vida te pide que fluyas con los eventos, no contra ellos.",
+                    "La sanación llega a través de la aceptación y el llanto liberador.",
+                    "Eres parte de la corriente eterna de la existencia."
+                ], 
+                recommendations: ["Toma un baño consciente hoy.", "No busques respuestas lógicas ahora.", "Anota tus sueños al despertar."] 
+            },
+            { 
+                name: 'Ingwaz', 
+                symbol: 'ᛜ', 
+                meaning: 'Potencial y Almacenaje', 
+                thoughts: [
+                    "Hay una fuerza latente en ti que está esperando el momento justo para estallar.",
+                    "La introspección es el almacén de tu futura victoria. No desperdicies tu energía.",
+                    "La conclusión de un ciclo es la preparación necesaria para el siguiente gran salto.",
+                    "La semilla contiene todo el árbol; tú contienes todo tu destino.",
+                    "Guarda tus planes en el silencio fértil de tu corazón.",
+                    "El reposo es productivo cuando se usa para gestar grandes ideas.",
+                    "La fuerza interna se cultiva en la soledad y la meditación.",
+                    "No apresures el brote; la tierra sabe cuándo es primavera.",
+                    "La plenitud llega a quien sabe esperar el momento de la acción.",
+                    "Tu potencial es infinito, pero requiere un contenedor de disciplina.",
+                    "Enfoca tu energía en un solo punto para lograr la máxima potencia.",
+                    "La transformación ocurre desde adentro hacia afuera.",
+                    "El espacio sagrado de tu interior es tu refugio más seguro.",
+                    "Agradece los finales; son el terreno fértil de los comienzos.",
+                    "La sabiduría se digiere en el silencio del descanso.",
+                    "Prepara el terreno de tu vida para recibir la abundancia.",
+                    "La maduración requiere tiempo, oscuridad y cuidado constante.",
+                    "Eres una semilla de luz plantada en la tierra de la materia.",
+                    "La paz interna atrae las condiciones externas para florecer.",
+                    "Tu poder latente es el susurro de tu futuro Yo."
+                ], 
+                recommendations: ["Termina lo que empezaste hoy.", "Mantén tus planes en secreto.", "Busca un espacio de soledad."] 
+            },
+            { 
+                name: 'Dagaz', 
+                symbol: 'ᛞ', 
+                meaning: 'Despertar y Transformación', 
+                thoughts: [
+                    "La noche y el día se encuentran en el alba. Los opuestos son solo caras de la misma moneda.",
+                    "La iluminación no es algo que se alcanza, es algo que se reconoce en el presente.",
+                    "Un cambio radical de perspectiva puede transformar tu mundo en un instante.",
+                    "El despertar es el fin de la ilusión de la separación.",
+                    "Acepta tu luz y tu sombra con la misma gratitud.",
+                    "La transformación real es irreversible y luminosa.",
+                    "Cada amanecer es una oportunidad para ser una nueva versión de ti mismo.",
+                    "La claridad de Dagaz disipa los miedos más profundos de la noche.",
+                    "Confía en que el universo conspira para tu despertar.",
+                    "La vida es un eterno presente lleno de posibilidades infinitas.",
+                    "Busca el punto de equilibrio entre todos los extremos.",
+                    "La verdadera libertad es vivir sin las cadenas del pasado.",
+                    "Tu conciencia es el sol que ilumina tu realidad cotidiana.",
+                    "El milagro es ver lo sagrado en lo ordinario.",
+                    "La unión de los opuestos genera la chispa de la creación.",
+                    "Despierta a tu verdadera naturaleza divina.",
+                    "La luz de la verdad no quema, libera.",
+                    "Camina con la confianza de quien ha visto el sol en medio de la noche.",
+                    "La transformación es el destino final del Guerrero Espiritual.",
+                    "Hoy es el día de tu gran despertar."
+                ], 
+                recommendations: ["Rompe con un viejo paradigma hoy.", "Observa la belleza en lo cotidiano.", "Confía en que la oscuridad está pasando."] 
+            },
+            { 
+                name: 'Othila', 
+                symbol: 'ᛟ', 
+                meaning: 'Herencia y Pertenencia', 
+                thoughts: [
+                    "Honrar a tus padres no significa repetir sus errores, sino extraer la sabiduría de su historia.",
+                    "Tu hogar está donde tu corazón se siente en paz y alineado con su propósito.",
+                    "El legado más valioso que dejarás no son las cosas, sino el impacto en las almas de otros.",
+                    "Eres el resultado de miles de ancestros; su fuerza fluye por tus venas.",
+                    "La verdadera herencia es la integridad y los valores que transmites.",
+                    "Crea un espacio de paz y belleza a tu alrededor.",
+                    "Pertenecer a algo más grande que tú te da raíces y alas.",
+                    "Honra tus tradiciones, pero no dejes que te limiten.",
+                    "La seguridad nace de saber quién eres y de dónde vienes.",
+                    "Tu hogar es el reflejo de tu orden interno.",
+                    "Protege lo que has construido con esfuerzo y amor.",
+                    "La sabiduría de los ancianos es el mapa para los jóvenes.",
+                    "El legado espiritual es la única riqueza que trasciende la muerte.",
+                    "Cuida la tierra que pisas; es la herencia de tus hijos.",
+                    "La familia es el primer taller del Guerrero Espiritual.",
+                    "Busca la paz en tus raíces para poder crecer hacia el cielo.",
+                    "La lealtad a tus principios es tu propiedad más preciada.",
+                    "Todo final en Othila es el regreso a la esencia pura.",
+                    "Construye algo que perdure más allá de tu tiempo físico.",
+                    "Eres el guardián de la llama de tu linaje."
+                ], 
+                recommendations: ["Conecta con tus raíces familiares.", "Embellece tu espacio físico hoy.", "Define tus valores fundamentales."] 
+            }
         ];
 
         const App = () => {
@@ -59,8 +737,10 @@
                 setIsSpinning(true);
                 setSelectedRune(null);
                 
+                // Simulación de conexión con el inconsciente
                 setTimeout(() => {
                     const randomRune = RUNES_DATABASE[Math.floor(Math.random() * RUNES_DATABASE.length)];
+                    // Selección aleatoria de una de las 20 frases
                     const randomThought = randomRune.thoughts[Math.floor(Math.random() * randomRune.thoughts.length)];
                     const randomRec = randomRune.recommendations[Math.floor(Math.random() * randomRune.recommendations.length)];
                     
@@ -70,7 +750,7 @@
                         currentRec: randomRec
                     });
                     setIsSpinning(false);
-                }, 1000);
+                }, 1200);
             };
 
             return (
@@ -78,80 +758,114 @@
                     {/* Botón Info */}
                     <button 
                         onClick={() => setShowReadme(true)}
-                        className="fixed top-6 right-6 w-10 h-10 bg-slate-900 border border-slate-700 rounded-full text-amber-500 flex items-center justify-center text-xl font-bold shadow-lg z-50"
+                        className="fixed top-6 right-6 w-10 h-10 bg-slate-900 border border-slate-700 rounded-full text-amber-500 flex items-center justify-center text-xl font-bold shadow-lg z-50 hover:bg-slate-800 transition-all"
                     >
                         ?
                     </button>
 
-                    {/* Modal */}
+                    {/* Modal de Información */}
                     {showReadme && (
-                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-                            <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl p-8">
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-300">
+                            <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl p-8 shadow-2xl">
                                 <h2 className="text-2xl font-serif text-amber-500 mb-4 border-b border-slate-800 pb-2">Guía del Oráculo</h2>
-                                <p className="text-slate-300 text-sm mb-6 leading-relaxed">
-                                    Las runas son espejos de tu inconsciente. No predicen, revelan lo que ya está en ti. Escucha el susurro.
-                                </p>
-                                <button onClick={() => setShowReadme(false)} className="w-full bg-amber-600 py-3 rounded-xl font-bold">ENTENDIDO</button>
+                                <div className="text-slate-300 text-sm mb-6 space-y-4 leading-relaxed custom-scrollbar max-h-60 overflow-y-auto pr-2">
+                                    <p>
+                                        Esta versión expandida cuenta con <strong>480 pensamientos únicos</strong> (20 por cada runa), lo que garantiza una profundidad analítica sin precedentes en tu diálogo con el inconsciente.
+                                    </p>
+                                    <p>
+                                        Las runas actúan como <strong>"códigos secretos"</strong>. Según Eros Rodrich, al sacar una al azar, la sincronicidad permite que tu mente consciente encuentre respuestas en los símbolos universales del Guerrero Espiritual.
+                                    </p>
+                                    <p className="italic text-amber-500/70">"El susurro de los símbolos rúnicos es una guía viva para navegar las complejidades del presente."</p>
+                                </div>
+                                <button 
+                                    onClick={() => setShowReadme(false)} 
+                                    className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-bold transition-all shadow-lg active:scale-95"
+                                >
+                                    ENTENDIDO
+                                </button>
                             </div>
                         </div>
                     )}
 
-                    <header className="text-center mb-10 pt-8">
-                        <h1 className="text-4xl font-serif font-bold text-amber-100 tracking-wider">El Oráculo de Eros</h1>
-                        <p className="text-slate-500 italic mt-2 text-sm">Diálogo con tu Yo interior</p>
+                    {/* Cabecera */}
+                    <header className="text-center mb-10 pt-8 animate-in fade-in slide-in-from-top-4 duration-1000">
+                        <h1 className="text-4xl md:text-5xl font-serif font-bold text-amber-100 tracking-wider">Tu runa del día</h1>
+                        <p className="text-slate-500 italic mt-2 text-sm tracking-widest uppercase">Diálogo Profundo con el Ser</p>
                     </header>
 
+                    {/* Área Principal */}
                     <main className="w-full max-w-md flex flex-col items-center">
                         <div className="relative w-72 h-72 mb-10 flex items-center justify-center">
-                            {/* Anillo de luz animado */}
                             <div className={`absolute inset-0 border-2 border-dashed border-amber-900/30 rounded-full ${isSpinning ? 'animate-spin-slow' : ''}`}></div>
+                            <div className="absolute inset-4 border border-amber-700/10 rounded-full"></div>
                             
-                            <div className="relative z-10 w-56 h-56 bg-slate-900 rounded-[3rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-slate-800 flex flex-col items-center justify-center p-6">
+                            <div className="relative z-10 w-56 h-56 bg-slate-900 rounded-[3rem] shadow-[0_0_60px_rgba(0,0,0,0.8)] border border-slate-800 flex flex-col items-center justify-center p-6 transition-all duration-500 overflow-hidden">
                                 {isSpinning ? (
-                                    <div className="text-amber-500 text-center">
+                                    <div className="text-amber-500 text-center animate-pulse">
                                         <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                        <p className="text-[10px] uppercase tracking-widest font-bold">Descifrando...</p>
+                                        <p className="text-[10px] uppercase tracking-[0.3em] font-bold">Descifrando el Susurro...</p>
                                     </div>
                                 ) : selectedRune ? (
-                                    <div className="text-center animate-in fade-in zoom-in duration-500">
-                                        <span className="text-8xl text-amber-200 font-serif rune-glow">{selectedRune.symbol}</span>
-                                        <h2 className="text-xl font-bold text-amber-100 tracking-[0.2em] mt-2 uppercase">{selectedRune.name}</h2>
-                                        <p className="text-amber-600 text-[10px] font-bold uppercase tracking-tighter">{selectedRune.meaning}</p>
+                                    <div className="text-center animate-in fade-in zoom-in duration-700">
+                                        <span className="text-8xl text-amber-200 font-serif rune-glow block leading-none">
+                                            {selectedRune.symbol}
+                                        </span>
+                                        <h2 className="text-xl font-bold text-amber-100 tracking-[0.2em] mt-4 uppercase border-t border-amber-500/20 pt-2">
+                                            {selectedRune.name}
+                                        </h2>
+                                        <p className="text-amber-600 text-[10px] font-bold uppercase tracking-widest mt-1">
+                                            {selectedRune.meaning}
+                                        </p>
                                     </div>
                                 ) : (
-                                    <div className="text-slate-700 text-center px-4">
-                                        <span className="text-4xl mb-2 block">✨</span>
-                                        <p className="text-xs italic">Haz una pregunta y saca una runa del saco.</p>
+                                    <div className="text-slate-700 text-center px-4 opacity-50">
+                                        <span className="text-4xl mb-2 block">ᚦ</span>
+                                        <p className="text-[10px] italic uppercase tracking-widest leading-loose">
+                                            Haz una pregunta y saca una runa del saco.
+                                        </p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
+                        {/* Botón de Acción */}
                         <button 
                             onClick={pickRune} 
                             disabled={isSpinning}
-                            className="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl font-black tracking-widest shadow-2xl transition-all active:scale-95 disabled:opacity-50"
+                            className="group relative w-full py-4 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl font-black tracking-[0.2em] shadow-2xl transition-all active:scale-95 disabled:opacity-50 overflow-hidden"
                         >
-                            {selectedRune ? "VOLVER A CONSULTAR" : "SACAR RUNA"}
+                            <span className="relative z-10 uppercase">
+                                {selectedRune ? "VOLVER A CONSULTAR" : "SACAR RUNA"}
+                            </span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-amber-700 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         </button>
 
+                        {/* Resultado de la Lectura */}
                         {selectedRune && !isSpinning && (
-                            <div className="w-full mt-8 space-y-4 animate-in slide-in-from-bottom-4 duration-700">
-                                <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl">
-                                    <p className="text-lg md:text-xl text-amber-50 font-serif italic text-center">
+                            <div className="w-full mt-8 space-y-4 animate-in slide-in-from-bottom-8 duration-1000">
+                                <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800 p-7 rounded-3xl shadow-xl border-t-amber-500/20">
+                                    <div className="flex items-center gap-2 mb-3 opacity-50">
+                                        <div className="w-1 h-1 bg-amber-500 rounded-full"></div>
+                                        <span className="text-[10px] font-bold uppercase tracking-widest">El Susurro de hoy</span>
+                                    </div>
+                                    <p className="text-xl md:text-2xl text-amber-50 font-serif italic text-center leading-relaxed">
                                         "{selectedRune.currentThought}"
                                     </p>
                                 </div>
-                                <div className="bg-emerald-950/20 border-l-4 border-emerald-500/50 p-5 rounded-r-2xl">
-                                    <h4 className="text-[10px] font-bold text-emerald-500 mb-1 uppercase tracking-widest">Acción sugerida:</h4>
-                                    <p className="text-slate-300 text-sm leading-relaxed">{selectedRune.currentRec}</p>
+                                
+                                <div className="bg-emerald-950/10 border-l-4 border-emerald-500/40 p-5 rounded-r-2xl shadow-lg">
+                                    <h4 className="text-[10px] font-bold text-emerald-500/80 mb-2 uppercase tracking-[0.2em]">Acción sugerida:</h4>
+                                    <p className="text-slate-300 text-sm leading-relaxed antialiased">
+                                        {selectedRune.currentRec}
+                                    </p>
                                 </div>
                             </div>
                         )}
                     </main>
 
-                    <footer className="mt-12 text-slate-800 text-[10px] text-center uppercase tracking-widest">
-                        Basado en el sistema rúnico de Eros Rodrich • v2.1
+                    {/* Pie de página */}
+                    <footer className="mt-auto pt-12 pb-6 text-slate-800 text-[10px] text-center uppercase tracking-[0.3em] font-bold opacity-50">
+                        Basado en el sistema rúnico de Eros Rodrich • v2.5 (Base de datos 20x)
                     </footer>
                 </div>
             );
